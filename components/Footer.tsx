@@ -159,7 +159,7 @@ export default function Footer() {
           © {year} {site.name}
         </p>
         <p className="label normal-case tracking-normal">
-          Built with Next.js, Three.js and Tailwind.
+          Built with ❤️ by Oluwayemi Oyinlola.
         </p>
         <a
           href="#main"
