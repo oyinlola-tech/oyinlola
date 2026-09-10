@@ -89,7 +89,17 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    // `suppressHydrationWarning` covers this one element's attributes: the
+    // inline script below appends " js" to the class list before React
+    // hydrates, so the live DOM legitimately differs from the SSR output.
+    // `data-scroll-behavior` tells the router about the smooth scrolling
+    // globals.css sets on <html>, so route changes are not animated.
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+    >
       <head>
         {/* Set before first paint so the pre-intro clip-paths apply and the
             entrance actually has somewhere to animate from. */}

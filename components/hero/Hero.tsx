@@ -272,90 +272,110 @@ export default function Hero() {
       </div>
 
       {/* ── NARROW LAYOUT ─────────────────────────────────────────────
-          Content starts directly under the dock rather than being pinned to
-          the bottom of a full-height box, which is what left a dead band
-          between the two. What space is left over goes to the scroll cue at
-          the foot, so it reads as composition instead of a gap. */}
-      <div className="shell relative flex min-h-[100svh] flex-col gap-6 pb-10 pt-[calc(96*var(--u)+3.5rem)] lg:hidden">
-        <div className="animate-fade flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="label flex items-center gap-2 text-ink-dim">
-            <span className="animate-pulse-dot size-1.5 rounded-full bg-signal" />
-            Available for work
-          </span>
-          <span className="label">{site.location}</span>
+          One phone screen, composed rather than stacked. The parts are
+          grouped — statement, actions, telemetry, foot — and the column is
+          `justify-between`, so leftover height is spread across the three
+          seams instead of collecting as one dead band above the scroll cue.
+          The gaps and the type are keyed to svh and vw, which is what keeps
+          the same four groups inside a 640-tall phone and filling a 930. The
+          top pad never drops below the dock's own foot — 30u down plus its
+          52px floor — or a landscape phone starts its copy behind it. */}
+      <div className="shell relative flex min-h-[100svh] flex-col justify-between gap-[clamp(0.7rem,2.2svh,1.4rem)] pb-[clamp(1.1rem,2.6svh,1.75rem)] pt-[max(clamp(4.4rem,10.5svh,6.5rem),calc(30*var(--u)+52px+0.75rem))] lg:hidden">
+        {/* Statement ------------------------------------------------- */}
+        <div className="flex flex-col gap-[clamp(0.65rem,1.8svh,1.1rem)]">
+          <div className="animate-fade flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="label flex items-center gap-2 text-ink-dim">
+              <span className="animate-pulse-dot size-1.5 rounded-full bg-signal" />
+              Available for work
+            </span>
+            <span className="label">{site.location}</span>
+          </div>
+
+          <p
+            aria-hidden="true"
+            className="display text-[clamp(2.3rem,min(10.4vw,5.6svh),3.5rem)] text-ink"
+          >
+            Systems that hold their shape.
+          </p>
+
+          <p
+            className="animate-rise max-w-md text-[clamp(0.88rem,3.7vw,1rem)] leading-[1.55] text-ink-dim"
+            style={{ animationDelay: "300ms" }}
+          >
+            I&rsquo;m {site.name}, a software engineer in Nigeria. I build backend APIs, data
+            pipelines and developer tools — and the architecture that holds them together.
+          </p>
         </div>
 
-        <p aria-hidden="true" className="display text-[clamp(2.6rem,11vw,4rem)] text-ink">
-          Systems that hold their shape.
-        </p>
+        {/* Focus and actions ----------------------------------------- */}
+        <div className="flex flex-col gap-[clamp(0.65rem,1.8svh,1.1rem)]">
+          {/* Sized so the four terms always fall as two even rows: at any
+              phone width two of them fit a line, and a lone chip on a row
+              of its own is what made this read as a list rather than a
+              band. */}
+          <ul className="animate-rise flex flex-wrap gap-1.5" style={{ animationDelay: "360ms" }}>
+            {focus.map((f) => (
+              <li
+                key={f}
+                className="rounded-full border border-line px-2 py-[0.32rem] font-mono text-[clamp(0.5rem,2.4vw,0.62rem)] uppercase leading-none tracking-[0.07em] text-muted"
+              >
+                {f}
+              </li>
+            ))}
+          </ul>
 
-        <p
-          className="animate-rise max-w-md text-[0.98rem] leading-relaxed text-ink-dim"
-          style={{ animationDelay: "300ms" }}
-        >
-          I&rsquo;m {site.name}, a software engineer in Nigeria. I build backend APIs, data
-          pipelines and developer tools — and the architecture that holds them together.
-        </p>
-
-        <ul
-          className="animate-rise flex flex-wrap gap-1.5"
-          style={{ animationDelay: "360ms" }}
-        >
-          {focus.map((f) => (
-            <li
-              key={f}
-              className="rounded-full border border-line px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-muted"
+          <div className="animate-rise flex flex-wrap gap-2.5" style={{ animationDelay: "420ms" }}>
+            <Link
+              href="/work"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-stage"
             >
-              {f}
-            </li>
-          ))}
-        </ul>
-
-        <div
-          className="animate-rise flex flex-wrap gap-3"
-          style={{ animationDelay: "420ms" }}
-        >
-          <Link
-            href="/work"
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-stage"
-          >
-            Selected work
-            <ArrowRight className="size-4" />
-          </Link>
-          <a
-            href={links.github}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-2 rounded-full border border-line-2 px-5 py-2.5 text-sm text-ink-dim"
-          >
-            GitHub
-            <ArrowUpRight className="size-4" />
-          </a>
+              Selected work
+              <ArrowRight className="size-4" />
+            </Link>
+            <a
+              href={links.github}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-2 rounded-full border border-line-2 px-5 py-2.5 text-sm text-ink-dim"
+            >
+              GitHub
+              <ArrowUpRight className="size-4" />
+            </a>
+          </div>
         </div>
 
+        {/* Telemetry — four figures in one hairline panel. It sheds as the
+            screen gets shorter: the detail line first, then the second row,
+            since the number and its label are what the block is for. */}
         <dl
-          className="animate-rise grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line"
+          className="animate-rise grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line [@media(max-height:520px)]:grid-cols-4"
           style={{ animationDelay: "540ms" }}
         >
           {telemetry.map((t) => (
-            <div key={t.label} className="glass border-0 px-5 py-4">
-              <dt className="label text-[0.6rem]">{t.label}</dt>
-              <dd className="font-display mt-2 text-3xl font-medium tracking-tight text-ink">
+            <div key={t.label} className="glass border-0 px-4 py-[clamp(0.6rem,1.7svh,0.95rem)]">
+              <dt className="label text-[0.58rem]">{t.label}</dt>
+              <dd className="font-display mt-1.5 text-[clamp(1.5rem,7.2vw,2rem)] font-medium leading-none tracking-tight text-ink">
                 {t.value}
               </dd>
-              <p className="mt-1 truncate text-xs text-muted">{t.detail}</p>
+              <p className="mt-1 hidden truncate text-[0.68rem] text-muted [@media(min-height:700px)]:block">
+                {t.detail}
+              </p>
             </div>
           ))}
         </dl>
 
-        <div className="mt-auto flex items-end justify-between pt-8">
+        {/* Foot ------------------------------------------------------- */}
+        <div className="flex items-end justify-between gap-4 border-t border-line pt-[clamp(0.8rem,2.2svh,1.4rem)]">
           <Link
             href="/lab"
             className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
           >
             $ open lab →
           </Link>
-          <span className="scroll-cue text-[0.6rem]" aria-hidden="true">
+          {/* A vertical cue costs ~60px of column, which a short phone
+              would rather spend on the composition — `is-optional` drops it
+              under 700px of viewport height. */}
+          <span className="scroll-cue is-optional text-[0.6rem]" aria-hidden="true">
             Scroll
             <span className="track" />
           </span>

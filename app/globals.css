@@ -496,6 +496,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue .track::after { animation: none; }
 }
+/* A vertical cue is ~60px of column. On a phone short enough that the hero
+   is already fighting for height, the composition is worth more than the
+   hint — the section still obviously scrolls. */
+@media (max-height: 699px) {
+  .scroll-cue.is-optional { display: none; }
+}
 
 /* ================================================================== *
  *  CV — print
@@ -585,4 +591,198 @@ body {
   .cv-doc a.cv-nolink::after {
     content: "";
   }
+}
+
+/* ================================================================== *
+ *  FOOTER
+ *
+ *  The page closes the way it opened: oversized lettering, a mono
+ *  telemetry voice, and one warm light. Everything here is layout the
+ *  utility classes cannot express — full-bleed type sized off the
+ *  viewport, a pointer-driven mask, and a marquee.
+ * ================================================================== */
+
+/* A warm haze rising out of the wordmark. Sits under everything (z-0) and
+   never intercepts a pointer. */
+.footer-bloom {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: calc(-42 * var(--u));
+  width: min(160vw, 1900px);
+  height: clamp(360px, 46vw, 760px);
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(
+    50% 50% at 50% 100%,
+    rgba(255, 176, 103, 0.17) 0%,
+    rgba(255, 143, 67, 0.06) 38%,
+    rgba(255, 176, 103, 0) 72%
+  );
+}
+
+/* ── the address, at headline scale ──────────────────────────────────
+   Sized off the character count rather than a fixed clamp, so a longer or
+   shorter address still runs the measure without wrapping mid-word. */
+.footer-mail {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-size: clamp(1.35rem, 5.4vw, 3.9rem);
+  color: var(--color-ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.footer-mail__text {
+  background-image: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  background-position: 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: background-size 0.7s var(--ease-out-expo);
+}
+.footer-mail:hover .footer-mail__text,
+.footer-mail:focus-visible .footer-mail__text {
+  background-size: 100% 100%;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-mail__text { transition: none; }
+}
+
+/* ── index rows ──────────────────────────────────────────────────── */
+.footer-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+.footer-row__i {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  color: var(--color-faint);
+  transition: color 0.3s var(--ease-out-quart);
+}
+.footer-row:hover .footer-row__i { color: var(--color-accent); }
+.footer-row__meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--color-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── ticker ──────────────────────────────────────────────────────────
+   Two identical runs sliding one run's width, so the seam never arrives.
+   Masked at both ends so items enter and leave rather than being cut. */
+.footer-ticker {
+  /* Weighted towards the ends so a word is already gone by the time it
+     reaches the edge, rather than being sliced there. */
+  --ticker-fade: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.12) 7%,
+    #000 22%,
+    #000 78%,
+    rgba(0, 0, 0, 0.12) 93%,
+    transparent 100%
+  );
+  overflow: hidden;
+  padding-block: 0.9rem;
+  -webkit-mask-image: var(--ticker-fade);
+  mask-image: var(--ticker-fade);
+}
+.footer-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: ticker 34s linear infinite;
+}
+.footer-ticker__run { display: flex; flex: none; }
+.footer-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.footer-ticker__item i {
+  width: 4px;
+  height: 4px;
+  rotate: 45deg;
+  background: var(--color-accent);
+  opacity: 0.7;
+}
+@keyframes ticker {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-ticker__track { animation: none; }
+}
+
+/* ── the wordmark ────────────────────────────────────────────────────
+   The SVG carries the geometry (see FooterMark); the CSS only paints it and
+   drives the pointer light. */
+.footer-mark {
+  position: relative;
+  isolation: isolate;
+  line-height: 0;
+}
+.footer-mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.footer-mark text {
+  font-family: var(--font-display);
+  font-weight: 500;
+  fill: currentColor;
+}
+.footer-mark__base { color: rgba(255, 255, 255, 0.065); }
+
+/* The lit copy is the same letters in the accent, revealed only inside a soft
+   disc at the pointer. --mx/--my are written by FooterMark once per frame; the
+   disc is a fixed-size box whose *position* follows the pointer, so the
+   gradient stays centred in it and size and place remain independent. */
+.footer-mark__lit {
+  position: absolute;
+  inset: 0;
+  color: var(--color-accent);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-out-quart);
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    #000 0%,
+    rgba(0, 0, 0, 0.6) 30%,
+    transparent 65%
+  );
+  mask-image: radial-gradient(
+    circle at center,
+    #000 0%,
+    rgba(0, 0, 0, 0.6) 30%,
+    transparent 65%
+  );
+  -webkit-mask-size: 32vw 32vw;
+  mask-size: 32vw 32vw;
+  -webkit-mask-position: calc(var(--mx, 50%) - 16vw) calc(var(--my, 50%) - 16vw);
+  mask-position: calc(var(--mx, 50%) - 16vw) calc(var(--my, 50%) - 16vw);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.footer-mark[data-lit="true"] .footer-mark__lit { opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) {
+  .footer-mark__lit { display: none; }
 }
