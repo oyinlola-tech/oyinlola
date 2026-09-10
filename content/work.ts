@@ -1549,6 +1549,504 @@ export const work: CaseStudy[] = [
     hue: 66,
     featured: false,
   },
+
+  /* ================================================================== */
+  {
+    slug: "aisle-commerce",
+    name: "Aisle Commerce",
+    kind: "Multi-tenant commerce SaaS",
+    category: "Commerce & marketplace",
+    year: "2026",
+    role: "Author",
+    status: "Private",
+    summary:
+      "A multi-tenant storefront platform — twelve bounded-context services behind a host-resolving gateway that signs every internal request, with an event bus that fails loudly rather than dropping payments.",
+    overview: [
+      "Aisle Commerce is a SaaS platform where each merchant gets their own storefront on their own domain. It is a Node monorepo: an Express SSR web app, an API gateway, twelve domain services, and a shared runtime package the services all build on.",
+      "The gateway is the interesting component. A request arrives and it decides whether the host is a platform host or a storefront host, asks store-service to resolve the domain, verifies the caller's token, then builds signed internal headers carrying request, actor and store context before proxying to the right service. Every downstream service validates that HMAC signature before it trusts any of it.",
+      "Services split by bounded context and each own their persistence: user, store, compliance, customer, product, cart, order, payment, billing, support, chat and notification, on ports 4101 through 4112.",
+    ],
+    problem: [
+      "Multi-tenancy is where commerce platforms leak. Every query, every cache key and every file path has to carry a tenant, and the moment one service trusts a tenant identifier that arrived in a header from the internet, one merchant can read another's orders.",
+      "The usual answer is to pass a tenant ID between services and hope nothing forges it. That works until a service is exposed directly, or an internal network stops being trustworthy, and then the tenant boundary was never real.",
+      "The second problem is events. Order confirmation depends on payment success arriving. A bus that silently drops a PAYMENT_SUCCEEDED event produces paid orders that never confirm and inventory that stays reserved forever — a failure nobody notices until reconciliation.",
+    ],
+    architecture: [
+      {
+        title: "Gateway as the only trusted boundary",
+        body: "Host resolution, token verification and internal header signing all happen in one place. Services never parse a client token; they verify an HMAC signature from the gateway. Tenant context becomes something a service can prove rather than something it has to trust.",
+      },
+      {
+        title: "Twelve services, one shared runtime",
+        body: "packages/shared carries environment loading, database bootstrap, internal auth signing, JWT handling, HTTP helpers, logging and event delivery. Each service owns its domain and its data; none of them reimplements the plumbing.",
+      },
+      {
+        title: "Events that refuse to disappear",
+        body: "RabbitMQ is optional. Without it the shared bus falls back to a Redis-backed durable queue with retry and dead-letter handling. If neither can accept an event, publishing fails loudly rather than dropping it — the correct behaviour when the event is PAYMENT_SUCCEEDED.",
+      },
+      {
+        title: "The flows that matter are event-driven",
+        body: "USER_REGISTERED provisions a trial subscription in billing-service. PAYMENT_SUCCEEDED confirms the order and commits reserved inventory; PAYMENT_FAILED marks it failed and releases the reservation. Inventory is reserved at checkout and only committed on payment, so a failed card does not sell stock that is still on the shelf.",
+      },
+      {
+        title: "Compliance as its own context",
+        body: "KYC, KYB, document handling and the review workflow live in compliance-service rather than being scattered through onboarding. A merchant's verification state is one service's answer, not a boolean copied into four tables.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Sign internal requests, do not trust the network",
+        body: "Signed internal headers cost a verification on every hop and remove an entire class of tenant-confusion bug. Given that the thing being isolated is one merchant's revenue from another's, that is a trade worth making before it is needed rather than after.",
+      },
+      {
+        title: "SSR rather than a single-page storefront",
+        body: "Storefronts live or die on how fast the first product page paints and how well it indexes. Express SSR gives both without shipping a client framework to a shopper on a phone.",
+      },
+      {
+        title: "Optional broker, mandatory delivery",
+        body: "Requiring RabbitMQ locally would make the platform painful to run; dropping events when it is absent would make it dangerous in production. A Redis fallback with dead-lettering keeps development easy and keeps production honest.",
+      },
+      {
+        title: "Documented gaps",
+        body: "The repository carries a gap document alongside the architecture and API docs, and the service inventory marks status per component. Knowing which consumers are still reserved for future use is part of knowing what the system does.",
+      },
+    ],
+    metrics: [
+      { value: "12", label: "Domain services" },
+      { value: "8", label: "Domain events" },
+      { value: "HMAC", label: "Internal request auth" },
+      { value: "SSR", label: "Storefront rendering" },
+    ],
+    stack: ["Node.js", "Express", "MySQL", "Redis", "RabbitMQ", "Socket.IO", "JWT", "HMAC"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/e-commmerce-saas" }],
+    hue: 18,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "gly-vtu",
+    name: "GLY VTU",
+    kind: "Wallet & bill payments platform",
+    category: "Payments & fintech",
+    year: "2026",
+    role: "Author",
+    status: "Private",
+    summary:
+      "A virtual top-up platform — wallet, transfers, airtime and bills through VTpass, Flutterwave virtual cards, KYC tiers, and admin tooling for anomalies and audit.",
+    overview: [
+      "GLY VTU is a virtual top-up platform: users fund a wallet, pay bills, buy airtime and data, transfer to each other, and issue virtual cards. Behind it sits an Express API on MySQL and a React storefront, with VTpass handling bills and Flutterwave handling cards.",
+      "VTU is the most common software product in Nigeria and the one most often built badly, because it looks like CRUD and behaves like a ledger. Money enters from a payment gateway, sits in a wallet, and leaves through a third-party biller that may succeed slowly, fail after charging, or answer twice.",
+      "The parts I care about are the ones that protect the balance: KYC tiers with limits, admin review tooling, anomaly dashboards, retention jobs, and an audit trail that can reconstruct what happened to a transaction.",
+    ],
+    problem: [
+      "A biller integration is not a function call. VTpass can accept a request, take the money, and time out before answering — leaving the platform unsure whether to debit the user, retry, or refund. Getting that wrong in either direction costs real money: retry and you have paid twice, refund and you have paid once for nothing.",
+      "Wallets invite the second failure. Two concurrent requests reading the same balance and both deciding it is sufficient will both spend it. A wallet without serialisation is an overdraft waiting for traffic.",
+      "The third is regulatory rather than technical. Moving money without identity tiers and limits is not a product you can operate, regardless of whether the code works.",
+    ],
+    architecture: [
+      {
+        title: "Wallet and transaction history",
+        body: "Wallet operations, transfers and a transaction history that is the source of truth rather than a view over one. Balance is something derived and reconcilable, not a number edited in place.",
+      },
+      {
+        title: "Bills through VTpass",
+        body: "Airtime, data and utility payments go through VTpass. The integration is treated as unreliable by default — a request that does not answer cleanly leaves the transaction in a state that is resolvable rather than assumed.",
+      },
+      {
+        title: "Virtual cards through Flutterwave",
+        body: "Card issuance is Flutterwave exclusively. One provider for one capability, rather than an abstraction over two providers neither of which is fully supported.",
+      },
+      {
+        title: "KYC tiers and limits",
+        body: "Verification level determines transaction limits, with admin review tooling for documents. Limits are enforced server-side against the tier, not surfaced as a UI hint.",
+      },
+      {
+        title: "Admin surface built for incidents",
+        body: "Dashboards for users, bills, transactions, finance, anomalies and audit. The anomaly view exists because the question during an incident is never 'show me all transactions' — it is 'show me the ones that do not look right'.",
+      },
+      {
+        title: "Hardened by default",
+        body: "Rate limiting, CSRF, a CORS allowlist, hardened headers, retention jobs and Swagger docs that disable themselves in environments where they should not exist.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Device verification in the onboarding flow",
+        body: "VTU accounts are attacked with credential stuffing because the balance is immediately spendable. Binding sessions to verified devices raises the cost of a stolen password from instant to inconvenient.",
+      },
+      {
+        title: "Retention jobs rather than infinite logs",
+        body: "A fintech audit trail grows without bound and contains exactly the data you least want to keep forever. Scheduled retention is a privacy control as much as a storage one.",
+      },
+      {
+        title: "One provider per capability",
+        body: "VTpass for bills, Flutterwave for cards, and no abstraction pretending either is swappable. A provider interface with one real implementation is indirection without benefit.",
+      },
+      {
+        title: "Generated audit reports",
+        body: "Operational scripts produce PDF audit reports rather than leaving the state of the system to be described from memory during a review.",
+      },
+    ],
+    metrics: [
+      { value: "25", label: "Route modules" },
+      { value: "69", label: "Frontend pages" },
+      { value: "2", label: "Money providers" },
+      { value: "KYC", label: "Tiered limits" },
+    ],
+    stack: ["Node.js", "Express", "MySQL", "React", "Vite", "Tailwind CSS", "VTpass", "Flutterwave"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/gly-vtu" }],
+    hue: 140,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "medexplain-ai",
+    name: "MedExplain AI",
+    kind: "Medical intelligence platform",
+    category: "AI & agents",
+    year: "2026",
+    role: "Author",
+    status: "Private",
+    summary:
+      "A healthcare workspace that explains medical reports with Gemini grounded in MedlinePlus and PubMed, then routes users to verified doctors — with consent, audit and privacy controls as first-class features.",
+    overview: [
+      "MedExplain AI takes a medical report a patient does not understand and explains it, then keeps the conversation going with thread-aware follow-ups, and connects them to a verified doctor when the answer needs one.",
+      "Three roles share the system. Patients upload reports, read analyses, chat and manage subscriptions. Doctors apply, get verified, and work appointments from their own dashboard. Admins manage users, doctors, reports, subscriptions, payments, coupons, analytics and audit logs.",
+      "The AI is deliberately constrained: Gemini is reached only through backend services, never from the browser, and answers are grounded with retrieval over imported MedlinePlus and PubMed content rather than left to the model's own recall.",
+    ],
+    problem: [
+      "A model that confidently explains a blood panel is useful. A model that confidently invents one is dangerous, and from the patient's side the two are indistinguishable — which makes ungrounded generation the wrong tool for this domain no matter how good the prose is.",
+      "Putting an AI key in a frontend is the second failure. Any client-side call means the key is extractable and the prompt is editable, so the safety constraints exist only as long as nobody opens developer tools.",
+      "Health data raises the stakes on everything else. Consent, retention, export and deletion are not settings to add later; a platform holding uploaded medical reports without them should not be accepting uploads.",
+    ],
+    architecture: [
+      {
+        title: "RAG over trusted sources",
+        body: "Medical knowledge is imported from MedlinePlus and PubMed and retrieved to ground answers. The model explains retrieved material rather than recalling it, which is the difference between a summary and a guess.",
+      },
+      {
+        title: "AI behind the backend only",
+        body: "Gemini is called from backend services. The browser never holds a key, never sees the system prompt, and cannot bypass the trusted-source context the answer is built on.",
+      },
+      {
+        title: "Report pipeline",
+        body: "Upload, validation, analysis, history and detail views — with upload validation on the way in, because a file-accepting endpoint on a health platform is the highest-value target in the system.",
+      },
+      {
+        title: "Doctor marketplace",
+        body: "Applications or admin-created accounts, a verification step, a doctor workspace, appointments and notifications. Verification is a state in the system, not a badge in a profile.",
+      },
+      {
+        title: "Consent and privacy as features",
+        body: "Consent records, privacy settings, notification preferences and billing-address controls are user-facing surfaces rather than implicit defaults buried in a terms page.",
+      },
+      {
+        title: "Payments with a safe simulator",
+        body: "OPay handles subscriptions, with a development simulator so the billing path can be exercised end to end without moving real money or depending on a sandbox being up.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Ground it or do not ship it",
+        body: "Retrieval over MedlinePlus and PubMed costs an import pipeline and a retrieval step on every answer. In a medical context that is not optimisation — it is the reason the feature is defensible at all.",
+      },
+      {
+        title: "Audit logs beside RBAC",
+        body: "Role-based access controls who can reach a report. Audit logs record who did. On health data, the second question gets asked more often than the first.",
+      },
+      {
+        title: "Strict refresh cookies",
+        body: "Access tokens as bearers, refresh tokens in strict cookies. A stolen access token expires; a stolen refresh token in localStorage is an account.",
+      },
+      {
+        title: "Accessible motion, not decorative motion",
+        body: "Page entry, cards, dropdowns, toasts, loading and chat states all animate, but the motion communicates state on a platform used by anxious people reading bad news. It is timed to reassure rather than to impress.",
+      },
+    ],
+    metrics: [
+      { value: "3", label: "User roles" },
+      { value: "20", label: "Service modules" },
+      { value: "22", label: "Migrations" },
+      { value: "RAG", label: "Grounded answers" },
+    ],
+    stack: ["Node.js", "Express", "MySQL", "Gemini API", "Socket.IO", "JWT", "RBAC", "OPay"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/health-ai" }],
+    hue: 108,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "glossy-store",
+    name: "Glossy Store",
+    kind: "E-commerce platform",
+    category: "Commerce & marketplace",
+    year: "2026",
+    role: "Author",
+    status: "Private",
+    summary:
+      "A full-stack storefront where every admin and superadmin login requires OTP — 28 Sequelize models, role-separated dashboards, and support chat with private attachment handling.",
+    overview: [
+      "Glossy Store is a React and Vite storefront over an Express and Sequelize backend on MySQL: catalogue, categories, cart, checkout, wishlist and orders, with separate admin and superadmin dashboards behind role-based access.",
+      "Twenty-eight Sequelize models, thirteen controllers, thirty frontend pages, twenty-two migrations. The database bootstraps itself on backend startup, so a fresh clone runs without a manual migration step.",
+      "The decision that shapes the security posture is small and unusual: OTP is mandatory on every admin and superadmin login attempt, not just on unrecognised devices.",
+    ],
+    problem: [
+      "Storefront admin accounts are the real target. A customer account buys something; an admin account edits prices, reads every order, and exports a customer list. Most e-commerce builds protect both with the same password form.",
+      "Optional two-factor solves this only for the people who opt in, which is never the account that gets compromised. Risk-based prompts help, but they fail exactly when an attacker logs in from a plausible device.",
+      "Support is the other soft edge. A support thread carries order details and often an attachment, and serving those from a public uploads directory means a guessable URL is a data leak.",
+    ],
+    architecture: [
+      {
+        title: "Mandatory OTP for privileged roles",
+        body: "Every admin and superadmin login goes through a dedicated /otp page with resend support. Customers get a normal login; anyone who can change a price does not.",
+      },
+      {
+        title: "Two admin tiers",
+        body: "Admin and superadmin are separate roles with separate dashboards rather than one dashboard with hidden buttons. Authorisation is enforced on the route, not on the render.",
+      },
+      {
+        title: "Commerce core",
+        body: "Products, categories, cart, checkout, wishlist and orders across 28 models — enough relational structure that the migrations and associations earn their keep.",
+      },
+      {
+        title: "Support chat with private attachments",
+        body: "Attachments in support threads are access-checked rather than served statically, so a file's URL is not its authorisation.",
+      },
+      {
+        title: "Self-bootstrapping database",
+        body: "The backend provisions its own schema on startup. For a project handed between machines, a clone that runs is worth more than a clone that documents how to make it run.",
+      },
+    ],
+    decisions: [
+      {
+        title: "OTP always, for staff",
+        body: "Mandatory second factor adds friction to a login that happens a few times a day for a handful of people, and removes the single-credential compromise that would expose every customer record. The friction is real and the trade is obvious.",
+      },
+      {
+        title: "Sequelize with real migrations",
+        body: "Twenty-two migrations against 28 models — a schema history that can move forward on a live database, rather than a sync that is only safe on an empty one.",
+      },
+      {
+        title: "Roles as routes, not as UI",
+        body: "Superadmin capability is separated at the API. Hiding a button is a presentation choice; refusing the request is an access control.",
+      },
+    ],
+    metrics: [
+      { value: "28", label: "Sequelize models" },
+      { value: "30", label: "Frontend pages" },
+      { value: "22", label: "Migrations" },
+      { value: "100%", label: "Staff logins with OTP" },
+    ],
+    stack: ["React", "Vite", "TypeScript", "Node.js", "Express", "Sequelize", "MySQL"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/Glossy-Store" }],
+    hue: 286,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "telente-technologies",
+    name: "Telente Technologies",
+    kind: "Agency site & admin platform",
+    category: "Product & interface",
+    year: "2026",
+    role: "Author",
+    status: "Live",
+    summary:
+      "The public site and content platform for a software agency — a React front end over an Express and MySQL admin backend managing services, projects, blogs, team, careers and testimonials.",
+    overview: [
+      "Telente Technologies is a software engineering agency in Okitipupa, Nigeria. This is its website and the admin platform behind it: a React and Vite front end for the public site, and a Node, Express and MySQL backend that powers every piece of content on it.",
+      "Nothing on the public site is hardcoded. Services, projects, blog posts, team profiles, careers, testimonials and contact submissions are all managed through a secure admin portal, which is what separates a company website from a company brochure.",
+      "It runs in production: the site at telente.site, the API and uploads on their own subdomain.",
+    ],
+    problem: [
+      "Agency sites decay. The team page lists someone who left a year ago, the careers page advertises a closed role, and the case studies stop at whatever was shipped when the site was built — because every change requires a developer and a deploy.",
+      "The usual fix is a hosted CMS, which trades the deploy problem for a vendor, a monthly cost and a content model that never quite fits.",
+      "The second requirement is discovery. An agency site that does not rank for what the agency does is an expensive business card, so SEO could not be an afterthought bolted on at the end.",
+    ],
+    architecture: [
+      {
+        title: "Content as data",
+        body: "Services, projects, blogs, team, careers, testimonials and contact submissions each have a model and an admin surface. Publishing is a database write, not a pull request.",
+      },
+      {
+        title: "Separate API and uploads origin",
+        body: "The API and uploaded media are served from their own subdomain rather than from the site, keeping the static front end independently deployable.",
+      },
+      {
+        title: "Secure admin portal",
+        body: "Authenticated content management with nine controllers covering the editable surfaces, kept behind its own auth boundary rather than mixed into the public routes.",
+      },
+      {
+        title: "Configuration through environment",
+        body: "Every deployment-specific value is an environment variable, so the same build runs locally and in production without code changes or committed secrets.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Own the CMS rather than rent one",
+        body: "The content model is small and specific — an agency's services, work and people. Building it directly costs less than fitting it into a general-purpose CMS and removes a recurring bill and a vendor from the critical path of the company's own website.",
+      },
+      {
+        title: "SEO as a project goal, not a checklist",
+        body: "The site was structured around what the agency needs to be found for. Treating discovery as an architectural requirement rather than a set of meta tags added late is the difference between ranking and merely being indexed.",
+      },
+      {
+        title: "Contact submissions persisted, not emailed",
+        body: "An enquiry that only exists as an email is an enquiry that gets lost. Storing them means the agency can see what it has not answered.",
+      },
+    ],
+    metrics: [
+      { value: "7", label: "Managed content types" },
+      { value: "9", label: "Admin controllers" },
+      { value: "12", label: "Public pages" },
+      { value: "Live", label: "In production" },
+    ],
+    stack: ["React", "Vite", "TypeScript", "Node.js", "Express", "MySQL"],
+    links: [
+      { label: "Live site", href: "https://www.telente.site" },
+      { label: "Source", href: "https://github.com/oyinlola-tech/telente-agency" },
+    ],
+    hue: 196,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "telente-logistics",
+    name: "Telente Logistics",
+    kind: "Logistics platform",
+    category: "Logistics & tracking",
+    year: "2026",
+    role: "Author",
+    status: "Private",
+    summary:
+      "A logistics platform with public package tracking, careers and applications, newsletter capture, and an admin dashboard behind OTP-secured authentication.",
+    overview: [
+      "Telente Logistics is a full-stack platform covering the public side of a logistics business — marketing pages, package tracking, contact and newsletter capture, careers and job applications — and the admin dashboard that operates it.",
+      "Package tracking is the piece customers actually use, and it is the one that has to work without an account: a tracking number typed into a public page, resolving to a status without exposing anything about the shipment beyond what the person holding the number should see.",
+      "Admin access is protected by OTP alongside a full credential lifecycle: forgot, reset and change password.",
+    ],
+    problem: [
+      "Public tracking endpoints are enumeration targets. Sequential tracking numbers plus an unauthenticated lookup is a way to walk every shipment a company has ever handled, including names and addresses.",
+      "Careers pages are the other overlooked surface — they accept file uploads from anonymous users, which is the same threat model as an upload form with none of the attention.",
+      "And a logistics admin dashboard controls where things go. Password-only access on a panel that can redirect a shipment is not proportionate to what it can do.",
+    ],
+    architecture: [
+      {
+        title: "Public tracking",
+        body: "Tracking resolves a number to a status for an unauthenticated caller, kept deliberately narrow in what it returns.",
+      },
+      {
+        title: "OTP-secured admin",
+        body: "Admin authentication requires a second factor, with forgot, reset and change password flows built as first-class paths rather than as an afterthought.",
+      },
+      {
+        title: "Careers and applications",
+        body: "Job listings with an application pipeline, so submissions land in the system where they can be reviewed rather than in an inbox.",
+      },
+      {
+        title: "Capture surfaces",
+        body: "Contact and newsletter capture persisted alongside the rest of the operational data.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Second factor on the operations panel",
+        body: "The dashboard can change where a package goes. That is a physical-world consequence, and it justifies friction that a content admin would not need.",
+      },
+      {
+        title: "Explicitly proprietary",
+        body: "The repository states in the README, the licence and the security policy that it is not free to use. Client work with an ambiguous licence is a problem deferred, not avoided.",
+      },
+      {
+        title: "Password lifecycle built up front",
+        body: "Forgot, reset and change are the flows that get retrofitted badly under pressure after someone is locked out. Building all three at once means one consistent token model instead of three improvised ones.",
+      },
+    ],
+    metrics: [
+      { value: "13", label: "Public pages" },
+      { value: "6", label: "Data models" },
+      { value: "OTP", label: "Admin second factor" },
+      { value: "3", label: "Password flows" },
+    ],
+    stack: ["React", "Vite", "TypeScript", "Node.js", "Express", "MySQL"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/Telente-logistic-Webapp" }],
+    hue: 246,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "telente-school",
+    name: "Telente School Management",
+    kind: "School management system",
+    category: "Education",
+    year: "2026",
+    role: "Author",
+    status: "Private",
+    summary:
+      "A school operations system covering admissions, attendance, timetables, results, fees and staff — with role-based access separating what students, teachers and administrators can reach.",
+    overview: [
+      "Telente School Management handles the operational side of running a school: student admission and registration, attendance, class management, timetables, results and reporting, fee and payment tracking, staff records, announcements and system administration.",
+      "The users are not one audience. Students, teachers, administrators and finance staff share the same data and need very different slices of it, which makes role-based access the organising constraint rather than a feature.",
+      "It also carries the unglamorous parts schools actually depend on: email notifications, permissions, settings and system backups.",
+    ],
+    problem: [
+      "School software fails on the calendar. Terms, sessions and classes all move, and a schema that treats a student's class as a column rather than as an enrolment in a term cannot answer what a student took two years ago.",
+      "Results are the second trap. A grade is not a single value — it is components, weights and a computed total, and a system that stores only the total cannot explain or correct it.",
+      "The third is access. Attendance, results and fees are visible to overlapping but different groups, and getting that wrong means a parent seeing another child's record.",
+    ],
+    architecture: [
+      {
+        title: "Student lifecycle",
+        body: "Admission, registration, attendance and progress tracking as connected stages rather than as separate screens over the same table.",
+      },
+      {
+        title: "Academic operations",
+        body: "Class management, timetabling, results and reporting — the recurring machinery of a term.",
+      },
+      {
+        title: "Finance",
+        body: "Payment tracking, billing and financial reporting kept beside the student record it belongs to.",
+      },
+      {
+        title: "Roles and permissions",
+        body: "Staff and administrator management with role-based access, so what a teacher can reach and what a bursar can reach are defined once and enforced centrally.",
+      },
+      {
+        title: "Operations",
+        body: "Email notifications, announcements, system settings and backups — the features that decide whether a school can actually run on the system.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Backups as a product feature",
+        body: "A school's records are not recoverable from anywhere else. Making backup a function of the system rather than an operational assumption is the difference between an incident and a catastrophe.",
+      },
+      {
+        title: "Role-based access as the foundation",
+        body: "With four audiences over one dataset, retrofitting authorisation means auditing every query. Defining roles first makes every later feature inherit the boundary.",
+      },
+      {
+        title: "Notifications in the system",
+        body: "Announcements and email notifications built in, because the alternative is a parallel WhatsApp group that becomes the real source of truth.",
+      },
+    ],
+    metrics: [
+      { value: "10", label: "Route modules" },
+      { value: "9", label: "Controllers" },
+      { value: "4", label: "User audiences" },
+      { value: "6", label: "Operational domains" },
+    ],
+    stack: ["Node.js", "Express", "MySQL", "JavaScript", "RBAC"],
+    links: [],
+    hue: 58,
+    featured: false,
+  },
 ];
 
 /**
@@ -1558,14 +2056,23 @@ export const work: CaseStudy[] = [
  * was wrong twice — it read "Thirteen" at fifteen entries, then "Fifteen" at
  * nineteen. A headline that counts its own list cannot drift from it.
  */
-const COUNT_WORDS = [
+const ONES = [
   "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
   "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
-  "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty",
+  "Sixteen", "Seventeen", "Eighteen", "Nineteen",
 ];
+const TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+/** Spells a count up to 99; beyond that the numeral is clearer anyway. */
+function spell(n: number): string {
+  if (n < 20) return ONES[n];
+  if (n > 99) return String(n);
+  const [t, o] = [Math.floor(n / 10), n % 10];
+  return o === 0 ? TENS[t] : `${TENS[t]}-${ONES[o].toLowerCase()}`;
+}
 
 export const workCount = work.length;
-export const workCountWord = COUNT_WORDS[work.length] ?? String(work.length);
+export const workCountWord = spell(work.length);
 
 export const workBySlug = Object.fromEntries(work.map((w) => [w.slug, w]));
 

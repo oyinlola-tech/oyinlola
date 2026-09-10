@@ -57,7 +57,7 @@ export const telemetry = [
   // Literal rather than derived from `work`: content/site.ts is imported by
   // the OG image route, which has a 500KB bundle budget, and pulling the whole
   // case-study file in to count it would spend most of that on prose.
-  { value: "19", label: "Case studies", detail: "Shipped & in progress" },
+  { value: "26", label: "Case studies", detail: "Shipped & in progress" },
   { value: "3", label: "Core languages", detail: "Go · Python · TypeScript" },
 ] as const;
 
