@@ -280,3 +280,67 @@ Also handled:
 
 The rate limit is per-instance and in memory. It stops a script; it is not a
 security boundary.
+
+---
+
+## The portrait
+
+No photograph is ever shown on the site. The three source photos live in
+`source-photos/` (git-ignored, never served) and are turned into stylised
+assets by `scripts/bake-portraits.py`:
+
+```bash
+python3 scripts/bake-portraits.py     # needs numpy, scipy, pillow
+```
+
+Per photo (`portrait`, `field`, `street`):
+
+| File | What it is |
+| --- | --- |
+| `<slug>-sketch.webp` | Line art, light ink. **Alpha is the ink density**, so there is no background at all — it composites over anything. |
+| `<slug>-sketch-ink.webp` | The same drawing in dark ink, for paper and light surfaces. |
+| `<slug>-cartoon.webp` | Flat cel colour with drawn outlines. |
+| `<slug>-depth.png` | Grayscale relief map. PNG, not WebP — lossy compression on a height map bands the relief. |
+
+Two things in that script are not obvious and are the difference between a
+drawing and a filter:
+
+- **Ink density follows brightness, not darkness.** The ink is light and the
+  page is dark, so rendered brightness *is* ink density. Keying the hatching
+  off darkness — the intuitive way — renders a photographic negative.
+- **Hatching is gated by local structure.** A flat studio wall or an empty sky
+  has no detail energy, so it takes no ink and drops away, while the subject
+  keeps its full tonal range.
+
+The cartoon pass flattens with repeated median filters and then quantises
+with an **adaptive palette**. Per-channel posterising on an unflattened image
+is what produces blotchy skin: the sensor noise survives quantisation and
+each channel bands independently.
+
+### The third dimension
+
+`components/portrait/PortraitCanvas.tsx` displaces a mesh by the depth map,
+lights the resulting relief, and cross-fades the two treatments. A toggle
+picks the base; the pointer carries a torch that reveals the other underneath
+it, and tilts the plate.
+
+The stylising is baked rather than done in the shader because a real-time
+pass cannot afford the median passes and palette quantisation above.
+
+The depth map is deliberately **not** raw luminance. On a studio portrait the
+brightest thing in frame is the shirt, so a luminance height-map pushes the
+shirt forward and sinks the face. Height comes from low-frequency form plus
+local detail energy instead, which lifts the features and leaves flat
+backdrops flat.
+
+It degrades cleanly: the still sketch is a real `<Image>` that is always
+rendered, and the canvas only fades in once all three textures have loaded —
+so no WebGL, or one failed texture, leaves a drawing rather than an error.
+
+### Where they're used
+
+- `/about` — the interactive portrait, with the sketch/cartoon toggle
+- `/cv` — light ink on screen, **dark ink in print** (same alpha, different colour)
+- `/contact` — the street scene, as a place
+
+`field-*` is baked and unused — it is there to be dropped in.
