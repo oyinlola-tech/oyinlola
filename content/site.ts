@@ -259,11 +259,6 @@ export const education: Education[] = [
     note: "Formal computer science alongside production engineering work.",
   },
   {
-    title: "Undergraduate study",
-    org: "Delta State University, Abraka",
-    period: "Prior",
-  },
-  {
     title: "Software engineering programmes",
     org: "ALX",
     period: "Completed",

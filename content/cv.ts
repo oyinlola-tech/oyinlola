@@ -234,11 +234,6 @@ export const cvEducation: CvEducation[] = [
     note: "Strengthening foundations in software engineering, computer systems, programming, databases and CS theory.",
   },
   {
-    title: "Undergraduate study",
-    org: "Delta State University, Abraka",
-    period: "Prior",
-  },
-  {
     title: "Senior Secondary School Certificate",
     org: "Optimum Victory College, Okitipupa, Ondo State",
     period: "Completed",
