@@ -240,7 +240,7 @@ export default function PortraitCanvas({
         () => readyRef.current?.(false),
       );
 
-    grab(`/${slug}-sketch.png`, "uSketch");
+    grab(`/${slug}-sketch.webp`, "uSketch");
     grab(`/${slug}-cartoon.webp`, "uCartoon");
     grab(`/${slug}-depth.png`, "uDepth", (t) => {
       const img = t.image as { width: number; height: number };
