@@ -243,11 +243,11 @@ function Section({
   return (
     <section className="grid gap-8 border-t border-line py-16 md:grid-cols-12 md:gap-10 lg:py-20">
       <Reveal className="md:col-span-3">
-        <p className="label flex items-center gap-3 md:sticky md:top-28">
+        <h2 className="label flex items-center gap-3 md:sticky md:top-28">
           <span className="text-accent">{index}</span>
           <span className="h-px w-6 bg-line-2" />
           {label}
-        </p>
+        </h2>
       </Reveal>
       <Reveal delay={60} className="md:col-span-9">
         {children}

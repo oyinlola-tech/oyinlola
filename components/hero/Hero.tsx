@@ -140,7 +140,12 @@ export default function Hero() {
               {
                 left: "calc(46 * var(--u))",
                 top: "calc(438 * var(--u))",
-                width: "calc(392 * var(--u))",
+                /* The slot below is 78u and the leading is 25u, so this copy
+                   was laid out for three lines. At 392u it wrapped to four
+                   and the last line ran through the focus chips at every
+                   desktop width. 470u is the first width that holds it to
+                   three without touching the type. */
+                width: "calc(470 * var(--u))",
                 fontSize: "calc(16.5 * var(--u))",
                 lineHeight: "calc(25 * var(--u))",
                 "--d": "480ms",

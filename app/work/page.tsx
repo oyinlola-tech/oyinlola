@@ -32,7 +32,7 @@ export default function WorkPage() {
       <PageHeader
         index="01"
         label="Work"
-        title="Thirteen systems, in full."
+        title="Fifteen systems, in full."
         lede={
           <>
             Every project here has a case study — the constraint that shaped it, the architecture it
@@ -55,6 +55,9 @@ export default function WorkPage() {
       />
 
       <section className="shell pb-24 lg:pb-32">
+        {/* The list is obvious to the eye but was invisible to the outline:
+            the card headings followed the page h1 with nothing between. */}
+        <h2 className="sr-only">Case studies</h2>
         <div className="space-y-4 lg:space-y-6">
           {featured.map((project, i) => (
             <FeatureRow key={project.slug} project={project} index={i} flip={i % 2 === 1} />
