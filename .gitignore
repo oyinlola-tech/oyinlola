@@ -8,3 +8,6 @@ dist
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Raw photographs. Only the baked assets in public/ are ever served.
+source-photos/

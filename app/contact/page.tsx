@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
@@ -76,7 +77,24 @@ export default function ContactPage() {
               </dl>
             </Reveal>
 
-            <Reveal delay={140}>
+            <Reveal delay={110}>
+              <figure className="mt-8 overflow-hidden rounded-2xl border border-line bg-stage-2/40">
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src="/street-cartoon.webp"
+                    alt="Oluwayemi on a street in Nigeria, drawn as a cel-shaded scene"
+                    fill
+                    sizes="(max-width: 1024px) 92vw, 26rem"
+                    className="object-cover"
+                  />
+                </div>
+                <figcaption className="label border-t border-line px-5 py-3 normal-case tracking-normal">
+                  Ondo State — where most of this gets built.
+                </figcaption>
+              </figure>
+            </Reveal>
+
+            <Reveal delay={160}>
               <div className="mt-8 rounded-2xl border border-line bg-stage-2/40 p-6">
                 <p className="label">Where I&rsquo;m most useful</p>
                 <ul className="mt-5 space-y-4">

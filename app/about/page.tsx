@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import Portrait from "@/components/portrait/Portrait";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
@@ -34,18 +34,13 @@ export default function AboutPage() {
           {/* Portrait + facts */}
           <Reveal className="lg:col-span-4">
             <div className="lg:sticky lg:top-32">
-              <div className="relative aspect-[4/5] w-full max-w-[20rem] overflow-hidden rounded-2xl border border-line bg-stage-3">
-                <Image
-                  src="/avatar.jpg"
-                  alt={site.name}
-                  fill
-                  sizes="(max-width: 1024px) 62vw, 20rem"
-                  className="object-cover grayscale transition-[filter] duration-700 hover:grayscale-0"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stage/70 via-transparent to-transparent" />
-              </div>
+              <Portrait
+                slug="portrait"
+                alt="Oluwayemi Oyinlola Michael, drawn as a line study"
+                className="w-full max-w-[22rem]"
+              />
 
-              <dl className="mt-8 max-w-[20rem] divide-y divide-line border-y border-line">
+              <dl className="mt-8 max-w-[22rem] divide-y divide-line border-y border-line">
                 {[
                   ["Based in", site.location],
                   ["Timezone", site.timezone],

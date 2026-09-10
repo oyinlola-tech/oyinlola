@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import PrintButton from "@/components/cv/PrintButton";
 import Reveal from "@/components/Reveal";
@@ -50,7 +51,28 @@ export default function CvPage() {
   return (
     <div className="shell cv-doc pb-24 pt-36 sm:pt-44 lg:pb-32 lg:pt-52 print:pb-0 print:pt-0">
       {/* ── Masthead ─────────────────────────────────────────────── */}
-      <header className="cv-block">
+      <header className="cv-block relative">
+        {/* The drawing has two ink polarities: light for the screen, dark for
+            paper — the same alpha, a different colour. */}
+        <div className="pointer-events-none absolute right-0 top-32 hidden w-[9rem] lg:block print:top-0 print:block print:w-[26mm]">
+          <div className="relative aspect-[3/4] w-full">
+            <Image
+              src="/portrait-sketch.png"
+              alt=""
+              fill
+              sizes="9rem"
+              className="object-cover opacity-80 print:hidden"
+            />
+            <Image
+              src="/portrait-sketch-ink.png"
+              alt=""
+              fill
+              sizes="26mm"
+              className="hidden object-cover print:block"
+            />
+          </div>
+        </div>
+
         <Reveal>
           <p className="label print-hide flex items-center gap-3">
             <span className="text-accent">06</span>
