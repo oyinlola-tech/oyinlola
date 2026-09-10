@@ -41,7 +41,11 @@ const VERT = /* glsl */ `
   void main() {
     vUv = uv;
     float bulge = bulgeAt(uv);
-    vMask = bulge;
+
+    /* Alpha mask is far wider than the dome — the dome shapes the surface,
+       this only takes the hard corners off the plate. */
+    vec2 q = (uv - 0.5) * uAspect;
+    vMask = 1.0 - smoothstep(0.50, 0.72, length(q));
 
     float d = texture2D(uDepth, uv).r;
     float h = bulge * uBulge + (d - 0.45) * uRelief * bulge;
@@ -81,7 +85,7 @@ const FRAG = /* glsl */ `
              - texture2D(uDepth, uv - vec2(uTexel.x, 0.0)).r;
     float dy = texture2D(uDepth, uv + vec2(0.0, uTexel.y)).r
              - texture2D(uDepth, uv - vec2(0.0, uTexel.y)).r;
-    n += vec3(-dx, -dy, 0.0) * uRelief * 9.0;
+    n += vec3(-dx, -dy, 0.0) * uRelief * 3.0;
     return normalize(n);
   }
 
@@ -95,11 +99,11 @@ const FRAG = /* glsl */ `
     /* The relief is lit from upper left, the way a drawing on a raised
        surface would be. Kept shallow — this is a carving, not a bust. */
     vec3 L = normalize(vec3(-0.42, 0.62, 0.66));
-    float diff = clamp(dot(n, L) * 0.5 + 0.62, 0.0, 1.4);
-    float rim = pow(1.0 - clamp(n.z, 0.0, 1.0), 2.4);
+    float diff = 0.90 + dot(n, L) * 0.24;
+    float rim = pow(1.0 - clamp(n.z, 0.0, 1.0), 3.2);
 
-    vec3 sketchCol  = sk.rgb * (0.72 + diff * 0.46) + uAccent * rim * 0.42;
-    vec3 cartoonCol = ct * (0.80 + diff * 0.34) + uAccent * rim * 0.30;
+    vec3 sketchCol  = sk.rgb * diff + uAccent * rim * 0.16;
+    vec3 cartoonCol = ct * diff + uAccent * rim * 0.10;
 
     /* Toggle sets the base; the torch reveals the other treatment. */
     float d = distance((uv - 0.5) * uAspect, (uPointer - 0.5) * uAspect);
@@ -110,11 +114,12 @@ const FRAG = /* glsl */ `
 
     /* Sketch keeps its ink alpha so it floats on the page; cartoon is a
        solid card. Between them the alpha crossfades with the mix. */
-    float alpha = mix(sk.a, 1.0, m) * smoothstep(0.0, 0.09, vMask) * uReveal;
+    float alpha = mix(sk.a, 1.0, m) * vMask * uReveal;
 
     /* A ring on the torch boundary, so the reveal has a visible edge. */
-    col += uAccent * smoothstep(0.055, 0.0, abs(d - 0.27)) * uTorch * 0.5;
-    alpha = max(alpha, smoothstep(0.05, 0.0, abs(d - 0.27)) * uTorch * 0.5 * vMask);
+    float ring = smoothstep(0.05, 0.0, abs(d - 0.27)) * uTorch;
+    col += uAccent * ring * 0.28;
+    alpha = max(alpha, ring * 0.32 * vMask);
 
     if (alpha < 0.004) discard;
     gl_FragColor = vec4(col, alpha);
@@ -178,8 +183,8 @@ export default function PortraitCanvas({
       uDepth: { value: null as THREE.Texture | null },
       uAspect: { value: new THREE.Vector2(1, 1.333) },
       uTexel: { value: new THREE.Vector2(1 / 405, 1 / 540) },
-      uBulge: { value: 0.26 },
-      uRelief: { value: 0.30 },
+      uBulge: { value: 0.17 },
+      uRelief: { value: 0.22 },
       uMode: { value: mode === "cartoon" ? 1 : 0 },
       uPointer: { value: new THREE.Vector2(0.5, 0.5) },
       uTorch: { value: 0 },
