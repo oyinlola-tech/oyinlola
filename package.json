@@ -1,0 +1,29 @@
+{
+  "name": "oyinlola-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio of Oluwayemi Oyinlola Michael — software engineer.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "^1.43.0",
+    "next": "16.3.4",
+    "react": "19.3.0",
+    "react-dom": "^19.3.0",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.185.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  }
+}
