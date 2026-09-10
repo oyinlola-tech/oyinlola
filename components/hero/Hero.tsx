@@ -1,10 +1,8 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { site, links, telemetry, focus } from "@/content/site";
 import { work, type CaseStudy } from "@/content/work";
-
-const ConstellationCanvas = dynamic(() => import("./ConstellationCanvas"));
+import DeferredConstellation from "./DeferredConstellation";
 
 const HEADLINE = ["Systems that", "hold their shape."];
 
@@ -42,7 +40,7 @@ export default function Hero() {
 
       {/* Constellation ---------------------------------------------- */}
       <div className="absolute inset-0 -z-10">
-        <ConstellationCanvas />
+        <DeferredConstellation />
         <div
           className="pointer-events-none absolute inset-0"
           style={{

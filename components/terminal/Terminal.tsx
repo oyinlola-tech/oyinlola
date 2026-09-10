@@ -149,9 +149,18 @@ export default function Terminal({ className = "" }: { className?: string }) {
       </div>
 
       {/* Log */}
+      {/* `tabIndex={0}` is not decoration: a region with its own scrollbar has
+          to be reachable by keyboard, or the log can only be read with a
+          mouse. `role="log"` with a polite live region means a command's
+          output is announced when it arrives, which is the whole point of a
+          terminal you can only operate by typing. */}
       <div
         ref={scrollRef}
         onClick={() => inputRef.current?.focus()}
+        tabIndex={0}
+        role="log"
+        aria-live="polite"
+        aria-label="Terminal output"
         className="h-[min(62svh,30rem)] overflow-y-auto px-4 py-4 font-mono text-[0.78rem] leading-[1.72] sm:h-[min(64svh,34rem)] sm:px-6 sm:text-[0.82rem]"
       >
         {blocks.map((b, i) => (
