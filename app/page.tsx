@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Hero from "@/components/hero/Hero";
@@ -7,6 +8,14 @@ import { FeatureRow } from "@/components/WorkCards";
 import { work } from "@/content/work";
 import { disciplines, principles, site } from "@/content/site";
 import Terminal from "@/components/terminal/Terminal";
+import { pageMeta } from "@/lib/seo";
+
+export const metadata: Metadata = pageMeta({
+  title: `${site.name} — ${site.role}`,
+  description: site.description,
+  path: "/",
+  absoluteTitle: true,
+});
 
 const featured = work.filter((w) => w.featured);
 

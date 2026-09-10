@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
@@ -17,10 +18,12 @@ import {
   philosophy,
 } from "@/content/cv";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "CV",
-  description: `Curriculum vitae for ${site.name} — software engineer and backend developer. Go, Python and TypeScript; distributed systems, data engineering and application security.`,
-};
+  description:
+    `Curriculum vitae for ${site.name} — software engineer and backend developer. Go, Python and TypeScript; distributed systems, data engineering and application security.`,
+  path: "/cv",
+});
 
 /* A section head that reads the same on screen and on paper. */
 function Head({ n, children }: { n: string; children: React.ReactNode }) {

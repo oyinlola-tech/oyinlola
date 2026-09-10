@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { work, workBySlug, type CaseStudy } from "@/content/work";
-import { site } from "@/content/site";
+import { pageMeta } from "@/lib/seo";
 import ProjectSigil from "@/components/ProjectSigil";
 import Reveal from "@/components/Reveal";
 
@@ -18,17 +18,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const project = workBySlug[slug];
   if (!project) return {};
 
-  return {
+  return pageMeta({
     title: `${project.name} — ${project.kind}`,
     description: project.summary,
-    alternates: { canonical: `${site.url}/work/${project.slug}` },
-    openGraph: {
-      title: `${project.name} — ${project.kind}`,
-      description: project.summary,
-      url: `${site.url}/work/${project.slug}`,
-      type: "article",
-    },
-  };
+    path: `/work/${project.slug}`,
+    type: "article",
+  });
 }
 
 export default async function CaseStudyPage({ params }: Props) {

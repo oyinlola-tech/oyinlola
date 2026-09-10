@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -6,11 +7,12 @@ import Reveal from "@/components/Reveal";
 import Terminal from "@/components/terminal/Terminal";
 import { experiments } from "@/content/lab";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Lab",
   description:
     "An interactive shell over the whole portfolio, plus the experiments — framework research, CLI tooling, agent evaluation and rendering.",
-};
+  path: "/lab",
+});
 
 const STATUS_TONE: Record<string, string> = {
   Running: "text-signal",

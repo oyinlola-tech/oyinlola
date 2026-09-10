@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import Portrait from "@/components/portrait/Portrait";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
@@ -13,11 +14,12 @@ import {
   aboutBody,
 } from "@/content/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "About",
   description:
     "Oluwayemi Oyinlola Michael — software engineer in Nigeria. Backend systems, developer tools and data engineering. Background, education and how I work.",
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

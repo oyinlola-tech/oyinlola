@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -6,10 +7,12 @@ import Reveal from "@/components/Reveal";
 import ContactForm from "@/components/ContactForm";
 import { site, links } from "@/content/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Contact",
-  description: `Get in touch with ${site.name} — ${site.email}. Open to backend, platform and software engineering roles.`,
-};
+  description:
+    `Get in touch with ${site.name} — ${site.email}. Open to backend, platform and software engineering roles.`,
+  path: "/contact",
+});
 
 const channels = [
   { label: "Email", value: site.email, href: `mailto:${site.email}` },

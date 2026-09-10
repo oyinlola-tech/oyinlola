@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -6,11 +7,12 @@ import Reveal from "@/components/Reveal";
 import { disciplines } from "@/content/site";
 import { work } from "@/content/work";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Engineering",
   description:
     "Backend, architecture, data, security and infrastructure — the five layers the work sits in, with the projects that prove each one.",
-};
+  path: "/engineering",
+});
 
 export default function EngineeringPage() {
   return (

@@ -13,8 +13,12 @@
 
   --color-ink: #f4f5f7;
   --color-ink-dim: #a7adb8;
-  --color-muted: #7c838f;
-  --color-faint: #6a7180;
+  /* Both of these are measured against the stage, stage-4 and the dock's
+     own translucent tile — the three surfaces small mono text actually sits
+     on. The previous values (#7c838f / #6a7180) came in at 4.51 and 4.09,
+     so the dock's resting navigation labels were below AA. */
+  --color-muted: #8f96a1;  /* 6.72 : 1 on the stage */
+  --color-faint: #808795;  /* 5.55 : 1 on the stage, 4.77 on the dock tile */
 
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-2: rgba(255, 255, 255, 0.14);
@@ -468,7 +472,7 @@ body {
   font-family: var(--font-mono);
   font-size: calc(10 * var(--u));
   letter-spacing: calc(4 * var(--u));
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.5); /* 0.45 measured 4.48 : 1 — just under AA */
   text-transform: uppercase;
   text-decoration: none;
 }
@@ -785,4 +789,174 @@ body {
 .footer-mark[data-lit="true"] .footer-mark__lit { opacity: 0.5; }
 @media (prefers-reduced-motion: reduce) {
   .footer-mark__lit { display: none; }
+}
+
+/* ================================================================== *
+ *  ERROR STAGE — 404 / 500
+ *
+ *  A dead end in the site's own voice. The gallery at 404s.design keeps
+ *  landing on the same four moves: oversized type, a bit of glitch, one
+ *  interactive thing, and a real way back. This is those four, built from
+ *  idioms already in the page — the footer's pointer-lit wordmark, the
+ *  hero's survey scan, and the terminal's mono telemetry — so the error
+ *  reads as part of the site rather than a bolted-on apology.
+ *
+ *  Deliberately CSS-only: the error route must not pull the 536KB WebGL
+ *  chunk to tell someone a page is missing.
+ * ================================================================== */
+
+.err-stage { position: relative; isolation: isolate; }
+
+/* The footer's bloom, cooled. That end of the site is warm because it is an
+   invitation; this one went wrong, so the light goes blue. */
+.err-bloom {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: calc(-120 * var(--u));
+  width: min(150vw, 1700px);
+  height: clamp(320px, 42vw, 680px);
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(110, 146, 255, 0.13) 0%,
+    rgba(110, 146, 255, 0.045) 40%,
+    rgba(110, 146, 255, 0) 72%
+  );
+}
+
+/* ── the numerals ────────────────────────────────────────────────────
+   Two stacked copies of the same glyphs: a near-invisible base, and an
+   accent copy revealed only inside a disc that follows the pointer. Same
+   trick as .footer-mark, so the first and last thing you see on the site
+   respond to you the same way. */
+.err-code {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(5.5rem, 27vw, 19rem);
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.err-code__base { color: rgba(255, 255, 255, 0.085); }
+.err-code__lit {
+  position: absolute;
+  inset: 0;
+  color: var(--color-accent);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out-quart);
+  -webkit-mask-image: radial-gradient(circle at center, #000 0%, rgba(0,0,0,.55) 34%, transparent 66%);
+  mask-image: radial-gradient(circle at center, #000 0%, rgba(0,0,0,.55) 34%, transparent 66%);
+  -webkit-mask-size: 26vw 26vw;
+  mask-size: 26vw 26vw;
+  -webkit-mask-position: calc(var(--ex, 50%) - 13vw) calc(var(--ey, 50%) - 13vw);
+  mask-position: calc(var(--ex, 50%) - 13vw) calc(var(--ey, 50%) - 13vw);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.err-code[data-lit="true"] .err-code__lit { opacity: 0.92; }
+
+/* ── the tear ────────────────────────────────────────────────────────
+   A thin band of the numerals, offset sideways and tinted, sweeping down
+   the glyphs on a long cycle. Reads as a signal fault rather than a
+   decorative wobble because it only ever affects one slice at a time. */
+.err-code__tear {
+  position: absolute;
+  inset: 0;
+  color: var(--color-signal);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  animation: err-tear 7s var(--ease-out-quart) infinite;
+}
+@keyframes err-tear {
+  0%, 62% { clip-path: inset(100% 0 0 0); transform: none; }
+  66% { clip-path: inset(38% 0 55% 0); transform: translate3d(-0.055em, 0, 0); }
+  70% { clip-path: inset(62% 0 31% 0); transform: translate3d(0.04em, 0, 0); }
+  74% { clip-path: inset(14% 0 79% 0); transform: translate3d(-0.03em, 0, 0); }
+  78%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+}
+
+/* ── the trace ───────────────────────────────────────────────────────
+   What the failure actually looks like from the inside. Rows arrive in
+   sequence, which is the one piece of theatre here — a trace that appears
+   all at once is a screenshot; one that lands line by line is a request. */
+.err-trace {
+  font-family: var(--font-mono);
+  font-size: 0.775rem;
+  line-height: 1.7;
+  border-left: 1px solid var(--color-line-2);
+}
+.err-trace__row {
+  display: flex;
+  gap: 0.85rem;
+  padding-left: 1rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  animation: err-row 0.5s var(--ease-out-quart) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes err-row {
+  from { opacity: 0; transform: translate3d(-6px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+.err-trace__k { flex: none; color: var(--color-faint); }
+
+/* ── nearest matches ─────────────────────────────────────────────────
+   The recovery affordance. An index row that fills from the left on hover,
+   so picking a way out feels like the rest of the site's links. */
+.err-route {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  padding: 0.7rem 0.9rem 0.7rem 0;
+  border-top: 1px solid var(--color-line);
+  text-decoration: none;
+  isolation: isolate;
+}
+.err-route::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -1;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(255, 176, 103, 0.1), rgba(255, 176, 103, 0));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease-out-expo);
+}
+.err-route:hover::before,
+.err-route:focus-visible::before { transform: scaleX(1); }
+.err-route__i {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  color: var(--color-faint);
+  transition: color 0.3s var(--ease-out-quart);
+}
+.err-route:hover .err-route__i,
+.err-route:focus-visible .err-route__i { color: var(--color-accent); }
+.err-route__arrow {
+  margin-left: auto;
+  flex: none;
+  color: var(--color-faint);
+  transition: transform 0.4s var(--ease-out-expo), color 0.3s var(--ease-out-quart);
+}
+.err-route:hover .err-route__arrow,
+.err-route:focus-visible .err-route__arrow {
+  color: var(--color-accent);
+  transform: translate3d(3px, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .err-code__tear { animation: none; opacity: 0; }
+  .err-trace__row { animation: none; }
+  .err-code__lit { display: none; }
 }

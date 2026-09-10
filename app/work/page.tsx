@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
@@ -6,11 +7,12 @@ import { FeatureRow, CompactCard } from "@/components/WorkCards";
 import { work, categories, openSource } from "@/content/work";
 import { links } from "@/content/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Work",
   description:
-    "Thirteen case studies — commerce, learning, logistics, security and developer tooling — with the architecture and trade-offs behind each.",
-};
+    "Fifteen case studies — commerce, learning, logistics, security and developer tooling — with the architecture and trade-offs behind each.",
+  path: "/work",
+});
 
 const LANG_DOT: Record<string, string> = {
   TypeScript: "#3178c6",
