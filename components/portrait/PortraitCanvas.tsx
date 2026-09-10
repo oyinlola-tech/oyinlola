@@ -42,10 +42,12 @@ const VERT = /* glsl */ `
     vUv = uv;
     float bulge = bulgeAt(uv);
 
-    /* Alpha mask is far wider than the dome — the dome shapes the surface,
-       this only takes the hard corners off the plate. */
-    vec2 q = (uv - 0.5) * uAspect;
-    vMask = 1.0 - smoothstep(0.50, 0.72, length(q));
+    /* The dome shapes the surface; this only takes the hard edge off the
+       plate. It has to be a rounded RECTANGLE — a circular mask on a 3:4
+       plate cuts most of the top and bottom away. */
+    vec2 e = abs(uv - 0.5) * 2.0;
+    float box = max(e.x, e.y);
+    vMask = 1.0 - smoothstep(0.90, 1.0, box);
 
     float d = texture2D(uDepth, uv).r;
     float h = bulge * uBulge + (d - 0.45) * uRelief * bulge;
@@ -296,12 +298,12 @@ export default function PortraitCanvas({
       uniforms.uTorch.value = THREE.MathUtils.damp(uniforms.uTorch.value, target.torch, 4, dt);
       uniforms.uPointer.value.x = THREE.MathUtils.damp(uniforms.uPointer.value.x, target.x, 6, dt);
       uniforms.uPointer.value.y = THREE.MathUtils.damp(uniforms.uPointer.value.y, target.y, 6, dt);
-      uniforms.uMode.value = THREE.MathUtils.damp(
-        uniforms.uMode.value,
-        modeRef.current === "cartoon" ? 1 : 0,
-        5,
-        dt,
-      );
+      /* Fast enough to settle in a handful of frames, because a weak GPU
+         gets few of them and a half-finished crossfade reads as a haze of
+         the other treatment rather than as a transition. */
+      const want = modeRef.current === "cartoon" ? 1 : 0;
+      uniforms.uMode.value = THREE.MathUtils.damp(uniforms.uMode.value, want, 9, dt);
+      if (Math.abs(want - uniforms.uMode.value) < 0.01) uniforms.uMode.value = want;
 
       mesh.rotation.y = THREE.MathUtils.damp(mesh.rotation.y, target.tiltY, 3, dt);
       mesh.rotation.x = THREE.MathUtils.damp(mesh.rotation.x, target.tiltX, 3, dt);
