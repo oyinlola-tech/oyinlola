@@ -57,14 +57,14 @@ export default function CvPage() {
         <div className="pointer-events-none absolute right-0 top-32 hidden w-[9rem] lg:block print:top-0 print:block print:w-[26mm]">
           <div className="relative aspect-[3/4] w-full">
             <Image
-              src="/portrait-sketch.png"
+              src="/portrait-sketch.webp"
               alt=""
               fill
               sizes="9rem"
               className="object-cover opacity-80 print:hidden"
             />
             <Image
-              src="/portrait-sketch-ink.png"
+              src="/portrait-sketch-ink.webp"
               alt=""
               fill
               sizes="26mm"

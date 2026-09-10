@@ -35,7 +35,7 @@ export default function Portrait({
     <figure className={className}>
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line">
         <Image
-          src={`/${slug}-${mode === "cartoon" ? "cartoon" : "sketch"}.png`}
+          src={`/${slug}-${mode === "cartoon" ? "cartoon" : "sketch"}.webp`}
           alt={alt}
           fill
           sizes="(max-width: 1024px) 70vw, 22rem"
