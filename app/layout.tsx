@@ -53,6 +53,12 @@ export const metadata: Metadata = {
     creator: "@oyinlola141",
   },
   robots: { index: true, follow: true },
+  // Set GOOGLE_SITE_VERIFICATION to the token from Search Console's HTML-tag
+  // method. Kept in the environment rather than committed, and omitted
+  // entirely when unset so no empty meta tag is emitted.
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport: Viewport = {
