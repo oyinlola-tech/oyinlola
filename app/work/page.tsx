@@ -4,13 +4,13 @@ import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { FeatureRow, CompactCard } from "@/components/WorkCards";
-import { work, categories, openSource } from "@/content/work";
+import { work, categories, openSource, workCount, workCountWord } from "@/content/work";
 import { links } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
   title: "Work",
   description:
-    "Fifteen case studies — commerce, learning, logistics, security and developer tooling — with the architecture and trade-offs behind each.",
+    `${workCount} case studies — commerce, logistics, communication, learning, security and developer tooling — with the architecture and trade-offs behind each.`,
   path: "/work",
 });
 
@@ -32,7 +32,7 @@ export default function WorkPage() {
       <PageHeader
         index="01"
         label="Work"
-        title="Fifteen systems, in full."
+        title={`${workCountWord} systems, in full.`}
         lede={
           <>
             Every project here has a case study — the constraint that shaped it, the architecture it

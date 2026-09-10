@@ -54,7 +54,10 @@ export const nav: NavItem[] = [
 export const telemetry = [
   { value: "74", label: "Go modules", detail: "Zudomart · 5 domains" },
   { value: "39", label: "TS packages", detail: "Zudojs framework" },
-  { value: "15", label: "Case studies", detail: "Shipped & in progress" },
+  // Literal rather than derived from `work`: content/site.ts is imported by
+  // the OG image route, which has a 500KB bundle budget, and pulling the whole
+  // case-study file in to count it would spend most of that on prose.
+  { value: "19", label: "Case studies", detail: "Shipped & in progress" },
   { value: "3", label: "Core languages", detail: "Go · Python · TypeScript" },
 ] as const;
 

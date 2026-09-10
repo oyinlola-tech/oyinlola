@@ -142,29 +142,43 @@ export const work: CaseStudy[] = [
     role: "Author",
     status: "Open source",
     summary:
-      "A 39-package modular TypeScript framework — DI, lifecycle, config, HTTP, events, CQRS, queues, tenancy and observability, each usable on its own.",
+      "A 39-package modular TypeScript framework — DI, lifecycle, config, HTTP, events, CQRS, queues, tenancy and observability, each usable on its own, with the dependency direction enforced by a build-time check.",
     overview: [
       "Zudojs is a modular TypeScript framework for backend services, APIs, distributed systems and fullstack platforms. It exists because I kept rewriting the same infrastructure — a DI container, layered config, a lifecycle with graceful shutdown, an event bus, a queue abstraction — in every project, slightly differently each time.",
-      "Rather than one opinionated runtime, it is 39 independent packages published under the @zudojs scope. An application installs only the concerns it actually has.",
+      "Rather than one opinionated runtime, it is 39 independent packages published under the @zudojs scope: 2,032 TypeScript source files, roughly 198,000 lines, 242 package test files. An application installs only the concerns it actually has.",
+      "Three beliefs sit under all of it. Explicit over implicit — dependencies, boundaries and lifecycles should be visible and enforceable. Composition over inheritance — behaviour is assembled, not inherited. Type safety end to end — types flow from request input to database output rather than stopping at the controller.",
       "The design constraint was explicitness. Frameworks that resolve dependencies by reflection and register behaviour by side effect are pleasant for a week and opaque forever after. Everything in Zudojs is registered by an explicit token and ordered by a declared dependency graph.",
     ],
     problem: [
       "Node's ecosystem is excellent at HTTP and thin everywhere else. The moment an application needs background jobs, an event bus, multi-tenancy, feature flags, transactions and tracing to work together, you are assembling seven unrelated libraries with seven lifecycle models and no shared context.",
       "The two usual answers are both bad. Adopt a batteries-included framework and inherit its entire runtime and deployment model. Or hand-roll the glue and rebuild it, differently, in the next project.",
+      "There is a third problem underneath both: in a framework, breaking changes propagate outward. If a foundation package depends on a transport package, every application that touches the foundation inherits the transport's instability. Most frameworks solve this with convention. Zudojs solves it with a check that fails the build.",
       "Zudojs is the third answer: independent packages with consistent contracts, so composition is a choice rather than a condition of entry.",
     ],
     architecture: [
       {
-        title: "Foundation layer",
-        body: "@zudojs/core (lifecycle, context, runtime, modules), @zudojs/runtime (application orchestrator), @zudojs/container (token-based DI), @zudojs/config (layered configuration with sources), @zudojs/lifecycle (state machine, dependency ordering, graceful shutdown), plus errors, validation, logger, constants and types.",
+        title: "Five tiers, dependencies flowing inward",
+        body: "Every package sits at a tier: 0 leaf (errors, types), 1 foundation (container, config, logger, events, cache, queue, database, security, tenancy and the rest), 2 application (core, runtime, cqrs, auth, rpc, api, openapi), 3 transport (http, cli), 4 developer experience (testing). A package may depend only on its own tier or lower. The graph is a DAG with no upward arrows, which is what keeps @zudojs/errors stable enough for all 39 packages to import it.",
       },
       {
-        title: "Infrastructure layer",
-        body: "http, api, database, transactions, queue, messaging, events, cqrs, cache, storage, scheduler and rpc — each a separate package with its own contract, none assuming the others are installed.",
+        title: "The tier map is executable",
+        body: "scripts/package-tiers.js is the single source of truth, imported by both the architecture check and the Vitest boundary test. It also verifies that no cycles exist and that every internal dependency uses the workspace:* protocol, so pnpm resolves siblings from source rather than quietly from the registry.",
       },
       {
-        title: "Platform layer",
-        body: "auth and auth-oauth, security, permissions, crypto, serialization, schema, tenancy, feature-flags, observability, middleware, plugins, openapi and testing.",
+        title: "Runtime as a state machine",
+        body: "Created → Initializing → Ready → Running → Draining → Stopped, with components moving through register → install → initialize → start → running → stop → dispose. Startup orders modules by declared dependencies; shutdown reverses it, drains in-flight requests to a deadline, then disposes. SIGINT and SIGTERM are handled by the runtime, not by application code.",
+      },
+      {
+        title: "Context without passing context",
+        body: "AsyncLocalStorage carries execution, tenant, transaction and logger context through async call chains, so a repository three layers down knows which tenant it is serving without that being threaded through every signature. Long-running operations take an AbortSignal, which is what makes graceful shutdown and timeouts actually cancel work rather than orphan it.",
+      },
+      {
+        title: "Controlled context, not the whole application",
+        body: "Plugins, modules and middleware receive a narrow context — container, config, logger, events — rather than the application object. A plugin cannot reach past its boundary, which is the difference between an extension point and a back door.",
+      },
+      {
+        title: "Errors as values",
+        body: "Every package roots its errors in @zudojs/errors. Each carries a machine-readable code, a cause, a severity, structured metadata, a transport status code, and an expose flag deciding whether it is safe to show a client. Internal failures are mapped at the transport boundary rather than leaking upward.",
       },
       {
         title: "Infrastructure neutrality",
@@ -172,34 +186,42 @@ export const work: CaseStudy[] = [
       },
       {
         title: "Generation and frontend adapters",
-        body: "A CLI generates fullstack projects, and 11 frontend framework adapters let the same backend contracts drive different clients.",
+        body: "zudojs-cli scaffolds backend, frontend or fullstack workspaces across three backend architectures — monolith, modular monolith, microservice — and eleven frontend targets: React, Next, Vue, Nuxt, Angular, Svelte, SvelteKit, Astro, vanilla, Flutter and React Native. Fullstack projects get apps/web beside apps/backend or apps/gateway, a shared types package, and a dev proxy.",
       },
     ],
     decisions: [
       {
         title: "Monorepo, independently published packages",
-        body: "One repository for coherent contracts, separate publishes so nobody installs 39 packages to get a DI container. Each package has its own build, types and version.",
+        body: "One repository for coherent contracts, separate publishes so nobody installs 39 packages to get a DI container. Each package has its own build, types and version — 37 at 1.0.0, openapi and auth-oauth at 1.1.0.",
       },
       {
         title: "Token-based DI instead of decorator reflection",
-        body: "Decorator-and-metadata DI needs a compiler flag, breaks under bundlers, and hides the dependency graph. Explicit tokens are more typing and dramatically more debuggable.",
+        body: "Decorator-and-metadata DI needs a compiler flag, breaks under bundlers, and hides the dependency graph. Explicit tokens are more typing and dramatically more debuggable. The container supports singleton, scoped and transient lifetimes, and detects circular dependencies at resolution with a named error rather than a stack overflow.",
+      },
+      {
+        title: "One tier map, imported twice",
+        body: "The boundary rules were originally duplicated between the check script and the test. The copies drifted, and auth-oauth ended up passing the Vitest check while failing the script — the exact failure the rule exists to prevent, produced by the tooling meant to enforce it. Both now import the same module, and the comment above it says why.",
       },
       {
         title: "Lifecycle as a real state machine",
         body: "@zudojs/lifecycle orders startup by declared dependencies and tears down in reverse, so a queue consumer can never outlive the database connection it reads through. Graceful shutdown is a framework guarantee, not an application chore.",
       },
       {
-        title: "ESM-only, strict TypeScript",
-        body: "No dual CJS/ESM build matrix. The framework targets modern Node and refuses to carry the compatibility surface that supporting everything would bring.",
+        title: "Small files, enforced",
+        body: "Maximum five files per folder excluding the barrel, maximum 150 lines per file, dot-notation names like pluginLifecycle.core.ts, and barrel index.ts files that re-export public API and contain no logic. Arbitrary limits, but they make a 2,000-file codebase navigable by path alone.",
+      },
+      {
+        title: "ESM-only, strict TypeScript, modern floor",
+        body: "No dual CJS/ESM build matrix. Node 24 and pnpm 11 are the floor, TypeScript is pinned through a workspace catalogue, and releases go through changesets. The framework targets modern Node and refuses to carry the compatibility surface that supporting everything would bring.",
       },
     ],
     metrics: [
       { value: "39", label: "Packages" },
+      { value: "198k", label: "Lines of TypeScript" },
+      { value: "5", label: "Enforced tiers" },
       { value: "11", label: "Frontend adapters" },
-      { value: "100%", label: "TypeScript, ESM" },
-      { value: "0", label: "Reflection metadata" },
     ],
-    stack: ["TypeScript", "Node.js", "pnpm workspaces", "Zod", "ESM"],
+    stack: ["TypeScript", "Node.js", "pnpm workspaces", "Zod", "Vitest", "changesets", "ESM"],
     links: [
       { label: "Documentation", href: "https://zudojs.oyinlola.site" },
       { label: "Source", href: "https://github.com/oyinlola-tech/zudo" },
@@ -1236,7 +1258,314 @@ export const work: CaseStudy[] = [
     hue: 300,
     featured: false,
   },
+
+  /* ================================================================== */
+  {
+    slug: "ch-rtv",
+    name: "CH RTV",
+    kind: "Carrier haulage visibility platform",
+    category: "Logistics & tracking",
+    year: "2026",
+    role: "Lead engineer",
+    status: "Private",
+    summary:
+      "Real-time GPS visibility for container haulage — a TCP gateway speaking the COBAN tracker protocol, geofence evaluation, and CMA-CGM integration behind five internal services.",
+    overview: [
+      "CH RTV is a Carrier Haulage Real-Time Visibility platform. Trucks moving containers carry COBAN GPS units; the platform ingests their positions, ties each device to a transport order, evaluates geofences around facilities, and reports movement upstream to CMA-CGM.",
+      "The work that matters here is not the dashboard. It is the device gateway: COBAN trackers speak a terse binary-ish protocol over a raw TCP socket, log in with their own identifier, and expect commands back on the same connection. There is no REST API to call and no SDK to install — the connection is the interface.",
+      "Five services divide the problem: device-gateway owns the TCP listener, device login and packet parsing; tracking-service ingests and stores positions and evaluates geofences; asset-service owns orders, facilities and assignments; integration-service shapes and delivers CMA-CGM payloads; admin-api handles authentication, aggregation, Swagger and hosting the dashboard.",
+    ],
+    problem: [
+      "Container haulage visibility fails at the seam between hardware and business process. The tracker knows where it is but not which order it is serving. The order system knows the job but not where the truck is. Joining them is the product.",
+      "A tracker's TCP session is long-lived, unreliable and unauthenticated in any modern sense. Devices reconnect, replay, drop mid-packet, and send positions out of order. Treating that stream as if it were an HTTP endpoint produces a system that looks fine in testing and loses trucks in production.",
+      "Carrier integration adds a second constraint: CMA-CGM expects a specific payload shape on a specific cadence, and a platform that cannot prove what it sent, and when, has no answer during a dispute.",
+    ],
+    architecture: [
+      {
+        title: "device-gateway",
+        body: "A raw TCP listener handling COBAN device login, packet parsing and outbound command dispatch. Kept deliberately separate from everything else, because the one component that must never block is the one holding thousands of open sockets.",
+      },
+      {
+        title: "tracking-service",
+        body: "Position ingest and storage, geofence evaluation against facility boundaries, and event forwarding when a vehicle enters or leaves one. Geofencing is where a raw position stream becomes an operational signal.",
+      },
+      {
+        title: "asset-service",
+        body: "Transport orders, facilities, device-to-order assignments and the supporting lookups. This is the layer that answers 'which truck is on which job', which is the join the rest of the system exists to make.",
+      },
+      {
+        title: "integration-service",
+        body: "CMA-CGM-facing configuration, payload shaping and delivery paths. Option 1 is implemented; Option 2 is a stub with no S3PWEB integration behind it, and is documented as a stub rather than described as support.",
+      },
+      {
+        title: "admin-api and dashboard",
+        body: "JWT admin authentication with username-or-email login and SMTP-delivered OTP password reset, rate limiting, request validation, internal service isolation, Swagger, and a Tailwind dashboard covering tracking, alerts, reports and integration mode.",
+      },
+    ],
+    decisions: [
+      {
+        title: "The TCP gateway is its own service",
+        body: "Device ingestion has a completely different failure profile from a CRUD API: thousands of idle sockets, partial frames, reconnect storms. Folding it into the admin API would mean one slow database query stalls packet parsing for every tracker on the network.",
+      },
+      {
+        title: "Documenting the stub as a stub",
+        body: "Integration Option 2 is a non-functional path. It would have been easy to describe it as supported and quietly return success. The README, the audit report and this case study all say it is a stub, because the cost of discovering that during a carrier onboarding is far higher than the cost of saying so now.",
+      },
+      {
+        title: "Vanilla dashboard, no framework",
+        body: "The operator console is HTML, Tailwind and plain JavaScript served by admin-api. It is a handful of screens watched on a warehouse monitor; a build pipeline and a component framework would have added dependencies and deployment steps without adding anything a dispatcher can see.",
+      },
+      {
+        title: "Proprietary, and explicit about it",
+        body: "The repository carries a licence, a notice and a contribution policy stating it is not open source. Ambiguous licensing on client work is a liability, not a neutral default.",
+      },
+    ],
+    metrics: [
+      { value: "5", label: "Internal services" },
+      { value: "16", label: "Route modules" },
+      { value: "11", label: "Service modules" },
+      { value: "TCP", label: "Device protocol" },
+    ],
+    stack: ["Node.js", "MySQL", "TCP sockets", "COBAN protocol", "JWT", "Tailwind CSS", "Swagger"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/chrtv" }],
+    hue: 232,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "rivvo",
+    name: "Rivvo",
+    kind: "Messaging & calling platform",
+    category: "Communication & real-time",
+    year: "2026",
+    role: "Author",
+    summary:
+      "A full-stack messaging platform — direct and group chat, status posts, WebRTC voice and video, group key rotation, and a moderation console — over Express, MySQL and Socket.IO.",
+    overview: [
+      "Rivvo is a messaging platform built to see how much of a real chat product one person can carry end to end: registration and OTP verification, direct and group conversations, status posts, voice and video calls, contact graphs, reports and an admin moderation console.",
+      "The backend is Express over MySQL with Socket.IO for presence, typing and call signalling; the frontend is React 18 and Vite. In production the backend serves the built frontend, so the whole thing deploys as one process.",
+      "Seventeen route groups and sixteen controllers on the backend, twenty-one pages on the frontend. The interesting parts are not the message list — they are key distribution, moderation and the call layer.",
+    ],
+    problem: [
+      "A chat app is the classic example of a project that looks small and is not. Sending a message is an afternoon. Everything around it — delivery state, read receipts, edits, view-once, blocking, group membership changes, key rotation when someone leaves, reporting, and an admin who can act on a report — is the actual system.",
+      "Group encryption metadata is where most hobby chat projects quietly give up. If a member leaves a group and the keys do not rotate, they can still read what follows. If keys rotate but are not redistributed, everyone else loses the conversation.",
+      "Moderation is the other half. A platform that accepts user-generated content without a report queue, a moderator role and an audit trail is not a product; it is a liability with a login page.",
+    ],
+    architecture: [
+      {
+        title: "Transport split by shape",
+        body: "REST under /api for anything with a request and a response; Socket.IO for presence, typing indicators and WebRTC signalling. Calls themselves are peer-to-peer WebRTC — the server brokers the handshake and then gets out of the media path.",
+      },
+      {
+        title: "Group keys and rotation",
+        body: "Users carry public keys; groups distribute member keys and rotate them on membership change. The server stores key material and distribution state rather than plaintext, so leaving a group actually ends access rather than merely hiding the UI.",
+      },
+      {
+        title: "Message semantics beyond send",
+        body: "Edits, deletes, view-once, read receipts, pinning and muting, plus attachments validated by file signature rather than by extension — the same magic-bytes rule the rest of my work uses, because a renamed .exe is the oldest upload trick there is.",
+      },
+      {
+        title: "Moderation and admin",
+        body: "User and message reports, moderator assignment and resolution, verification badges and pricing, admin analytics, and audit logging that covers refresh-token events as well as admin actions.",
+      },
+      {
+        title: "Groups and communities",
+        body: "Public and private groups, invites and join requests, and three roles — owner, admin, member — with avatars and banners passing the same file checks as attachments.",
+      },
+    ],
+    decisions: [
+      {
+        title: "One deployable, two applications",
+        body: "The Express backend serves the Vite build in production. For a project at this stage a second static host and a CORS surface would be operational overhead bought with nothing.",
+      },
+      {
+        title: "WebRTC peer-to-peer, server only for signalling",
+        body: "Relaying media through the server would mean paying for bandwidth proportional to call minutes. Presence-based signalling over Socket.IO and then a direct peer connection keeps the server's cost proportional to users, not to how long they talk.",
+      },
+      {
+        title: "Audit refresh tokens, not just admin actions",
+        body: "Refresh-token events are the earliest visible signal of a stolen session. Logging them alongside admin actions means the audit trail can answer 'when did this account start behaving differently', not only 'who deleted what'.",
+      },
+      {
+        title: "Shipped honestly as unfinished",
+        body: "The repository description says it is still being built and learned from. Overselling an in-progress system is how a portfolio loses the benefit of the doubt on the projects that are finished.",
+      },
+    ],
+    metrics: [
+      { value: "17", label: "Route groups" },
+      { value: "21", label: "Frontend pages" },
+      { value: "16", label: "Controllers" },
+      { value: "P2P", label: "WebRTC calls" },
+    ],
+    stack: ["React 18", "Vite", "TypeScript", "Node.js", "Express", "MySQL", "Socket.IO", "WebRTC", "JWT"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/rivvo" }],
+    hue: 320,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "revive-roots",
+    name: "Revive Roots Essentials",
+    kind: "E-commerce platform",
+    category: "Commerce & marketplace",
+    year: "2026",
+    role: "Author",
+    summary:
+      "A full-stack storefront and back office for hair and skincare — catalogue, cart, checkout, Flutterwave payments, currency-aware pricing, and eight admin panels over eighteen Sequelize models.",
+    overview: [
+      "Revive Roots Essentials is an e-commerce platform for premium hair and skincare products: a React storefront over an Express and Sequelize backend on MySQL, with Flutterwave for payments and NodeMailer for the transactional mail the order lifecycle generates.",
+      "Eighteen Sequelize models, seventeen controllers, thirty-two frontend pages. The storefront is the visible half; the other half is the back office, which covers products, orders, contacts, shipping fees, inventory, users, coupons and audit logs.",
+      "The parts that took the real work were the ones customers only notice when they break: currency-aware pricing, shipping fee quoting, and an order lifecycle that emails the right thing at the right moment — placed, paid, failed, status changed, refunded.",
+    ],
+    problem: [
+      "Storefronts are easy to start and hard to finish. A product grid and a cart are a weekend. Coupons that interact correctly with shipping quotes, inventory that does not oversell, refunds that reconcile, and an audit log that can answer what an admin changed last Tuesday are the reason e-commerce projects stall at eighty percent.",
+      "Selling into Nigeria adds constraints a generic template does not carry: local payment rails rather than card-first checkout, currency-aware pricing, and shipping fees that vary by destination rather than a flat national rate.",
+      "Payment failure is the case that matters most and gets tested least. A customer whose payment fails and hears nothing assumes the order succeeded, and the first anyone learns otherwise is a support message.",
+    ],
+    architecture: [
+      {
+        title: "Catalogue and inventory",
+        body: "Products, categories, featured selections and inventory support, with currency-aware pricing so the displayed price is correct for the buyer rather than converted at the last step.",
+      },
+      {
+        title: "Cart to order",
+        body: "Cart, wishlist, checkout, shipping fee quoting and order history — one path from browsing to a placed order, with the fee resolved before payment rather than surprising the customer at the end.",
+      },
+      {
+        title: "Payments via Flutterwave",
+        body: "Flutterwave handles collection, which is what a Nigerian storefront actually needs — local cards, transfers and the rails customers already trust — instead of a card-only checkout that fails for most of the market.",
+      },
+      {
+        title: "Order lifecycle email",
+        body: "Five distinct transactional mails: order placed, payment receipt, payment failed, status update and refund update. The failure mail is the one most storefronts omit and the one that prevents the most support load.",
+      },
+      {
+        title: "Back office",
+        body: "Admin panels for products, orders, contacts, shipping fees, inventory, users, coupons and audit logs, plus contact-form persistence with alerts — so a customer enquiry lands in the system rather than in an inbox.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Sequelize over a hand-rolled data layer",
+        body: "Eighteen models with real relationships — orders to items to products to inventory — is past the point where hand-written SQL per query stays consistent. Migrations and associations were worth the abstraction here in a way they are not on a three-table service.",
+      },
+      {
+        title: "Flutterwave rather than card-first",
+        body: "Optimising for the payment method the customer actually holds matters more than optimising for the integration with the best documentation.",
+      },
+      {
+        title: "Email the failure, not only the success",
+        body: "A payment-failed receipt is an unusual thing to build and a cheap one. It converts a silent failure into a customer who knows to try again.",
+      },
+      {
+        title: "Audit logs from the start",
+        body: "Admin panels that mutate price, stock and orders need a record of who changed what before the first dispute, not after it.",
+      },
+    ],
+    metrics: [
+      { value: "18", label: "Sequelize models" },
+      { value: "32", label: "Frontend pages" },
+      { value: "17", label: "Controllers" },
+      { value: "5", label: "Lifecycle emails" },
+    ],
+    stack: ["React", "Vite", "Tailwind CSS", "Node.js", "Express", "Sequelize", "MySQL", "Flutterwave", "NodeMailer"],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/revive-root-essentials" }],
+    hue: 124,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "ikale",
+    name: "IKALE",
+    kind: "Community membership platform",
+    category: "Civic & infrastructure",
+    year: "2026",
+    role: "Backend engineer",
+    status: "Private",
+    summary:
+      "A Fastify and Prisma backend for community membership, built around account recovery that never reveals whether an account exists — OTPs hashed at rest, delivery moved off the response path.",
+    overview: [
+      "IKALE is a membership backend built at Newdich Technology for an Ikale community register. Its data model is the clearest statement of what it is for: alongside the usual account fields, a member carries a family name, an ancestral location — ward, town, local government, state — and, separately, a current residential address, state and country.",
+      "That separation is the product. A community register that collapses where someone is from into where someone lives cannot answer the question it exists to answer.",
+      "The engineering weight sits in authentication and account recovery, which is where I spent most of 357 commits. Fastify 5, Prisma 7 against PostgreSQL, Zod for validation, bcrypt for passwords, JWT for sessions, nodemailer for delivery, and a layered structure — routes, controllers, services, repositories, DTOs, validators, jobs, loaders — kept strict enough that three people could work in it without collisions.",
+      "Every endpoint I built is documented in the repository with its request shape, response shape and failure modes, in a per-engineer workspace under docs/.",
+    ],
+    problem: [
+      "Password recovery is the most attacked endpoint on any application, and the one most often built as a happy path. The standard implementation leaks: send a code to a known address and it returns quickly, send to an unknown one and it returns quickly too — but not quite as quickly, because one of them did real work.",
+      "That timing difference is an account enumeration oracle. Given a list of email addresses, an attacker learns which belong to members of a community register. For a register tied to a specific ethnic community and to ancestral locations, that is not an abstract privacy concern.",
+      "The second problem is storage. A recovery code sitting in the database in plaintext turns a read-only breach into full account takeover across every account with a live code.",
+    ],
+    architecture: [
+      {
+        title: "Recovery that reveals nothing",
+        body: "Initiating recovery generates a six-digit OTP, hashes it, stores the hash, and returns the same success response whether or not the address belongs to an account. Delivery runs in the background after the response is sent, so response time is a constant that carries no information about account existence.",
+      },
+      {
+        title: "OTPs hashed at rest",
+        body: "The database stores a hash, never the code. A dump of PasswordRecoveryToken yields nothing usable, and verification compares hashes rather than reading a secret back out.",
+      },
+      {
+        title: "Delivery that cleans up after itself",
+        body: "Email is the default channel; SMS is attempted only where a member has a phone number and has explicitly opted in. If every channel fails, the token is deleted rather than left live, and the failure is logged — a code nobody received should not remain valid.",
+      },
+      {
+        title: "Layered by responsibility",
+        body: "Routes, controllers, services, repositories, DTOs, validators, middlewares, jobs, loaders, errors and configs as separate directories. Verbose for a small service, but it is what let three engineers work in parallel and what makes the boundary between HTTP concerns and domain logic non-negotiable.",
+      },
+      {
+        title: "Documented per endpoint",
+        body: "Each endpoint has a markdown document covering overview, method and path, authentication, request, responses and failure modes, kept in the repository beside the code rather than in a wiki that drifts.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Constant-time responses over fast ones",
+        body: "Moving delivery off the response path costs the ability to tell a caller that sending failed. That is the correct trade: the caller is often an attacker, and the legitimate user finds out by not receiving a code.",
+      },
+      {
+        title: "Two token types, not one",
+        body: "Password reset and password recovery are separate flows with separate tables and lifetimes. Reusing one token type for both would mean one expiry policy, one revocation rule and one blast radius for two different threat models.",
+      },
+      {
+        title: "Citext for email",
+        body: "Email is stored as a case-insensitive column at the database level rather than lowercased in application code. Normalisation that lives in one service is normalisation that a second service will eventually forget.",
+      },
+      {
+        title: "bcrypt here, Argon2 elsewhere",
+        body: "Argon2 is the better choice and what I reach for by default. This service inherited bcrypt from an existing deployment, and a hash migration mid-project would have been a larger risk than the difference between two sound algorithms.",
+      },
+    ],
+    metrics: [
+      { value: "357", label: "Commits" },
+      { value: "74", label: "TypeScript files" },
+      { value: "5", label: "Route groups" },
+      { value: "0", label: "Plaintext OTPs stored" },
+    ],
+    stack: ["TypeScript", "Fastify", "Prisma", "PostgreSQL", "Zod", "JWT", "bcrypt", "Nodemailer"],
+    links: [],
+    hue: 66,
+    featured: false,
+  },
 ];
+
+/**
+ * The case-study count, spelled out.
+ *
+ * Lives here, beside the array, because the /work headline hardcoded it and
+ * was wrong twice — it read "Thirteen" at fifteen entries, then "Fifteen" at
+ * nineteen. A headline that counts its own list cannot drift from it.
+ */
+const COUNT_WORDS = [
+  "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
+  "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+  "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty",
+];
+
+export const workCount = work.length;
+export const workCountWord = COUNT_WORDS[work.length] ?? String(work.length);
 
 export const workBySlug = Object.fromEntries(work.map((w) => [w.slug, w]));
 
