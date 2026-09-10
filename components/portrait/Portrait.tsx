@@ -33,7 +33,7 @@ export default function Portrait({
 
   return (
     <figure className={className}>
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line bg-stage-2">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line">
         <Image
           src={`/${slug}-${mode === "cartoon" ? "cartoon" : "sketch"}.png`}
           alt={alt}
@@ -45,12 +45,6 @@ export default function Portrait({
           }`}
         />
         <PortraitCanvas slug={slug} mode={mode} onReady={onReady} />
-
-        {/* Corner registration marks — it is a plate, so it gets plate marks. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-3 rounded-xl border border-white/[0.06]"
-        />
       </div>
 
       {showToggle ? (

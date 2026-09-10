@@ -109,7 +109,7 @@ const FRAG = /* glsl */ `
 
     /* Toggle sets the base; the torch reveals the other treatment. */
     float d = distance((uv - 0.5) * uAspect, (uPointer - 0.5) * uAspect);
-    float torch = smoothstep(0.32, 0.06, d) * uTorch;
+    float torch = smoothstep(0.28, 0.05, d) * uTorch;
     float m = mix(uMode, 1.0 - uMode, torch);
 
     vec3 col = mix(sketchCol, cartoonCol, m);
@@ -119,9 +119,9 @@ const FRAG = /* glsl */ `
     float alpha = mix(sk.a, 1.0, m) * vMask * uReveal;
 
     /* A ring on the torch boundary, so the reveal has a visible edge. */
-    float ring = smoothstep(0.05, 0.0, abs(d - 0.27)) * uTorch;
-    col += uAccent * ring * 0.28;
-    alpha = max(alpha, ring * 0.32 * vMask);
+    float ring = smoothstep(0.045, 0.0, abs(d - 0.235)) * uTorch;
+    col += uAccent * ring * 0.16;
+    alpha = max(alpha, ring * 0.20 * vMask);
 
     if (alpha < 0.004) discard;
     gl_FragColor = vec4(col, alpha);
