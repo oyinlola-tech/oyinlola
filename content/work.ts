@@ -17,7 +17,8 @@ export type CaseStudy = {
   category: string;
   year: string;
   role: string;
-  status: "Live" | "In development" | "Open source" | "Private" | "Archived";
+  /** Omitted where a project has no status worth stating. */
+  status?: "Live" | "Open source" | "Private" | "Archived";
   summary: string;
   overview: string[];
   problem: string[];
@@ -39,7 +40,6 @@ export const work: CaseStudy[] = [
     category: "Commerce & marketplace",
     year: "2023 — present",
     role: "Founder & lead engineer",
-    status: "In development",
     summary:
       "A Go modular monolith for African social commerce — 74 modules across five domains, escrow and three-tier verification, with a Python service for ranking, recommendation and fraud detection.",
     overview: [
@@ -216,7 +216,6 @@ export const work: CaseStudy[] = [
     category: "Payments & fintech",
     year: "2026",
     role: "Backend engineer",
-    status: "In development",
     summary:
       "Digital infrastructure for Ajo and Esusu savings groups — a double-entry ledger, HMAC-verified Nomba webhooks, and 14 background queues behind 32 repositories.",
     overview: [
@@ -309,7 +308,6 @@ export const work: CaseStudy[] = [
     category: "AI & agents",
     year: "2026",
     role: "Author",
-    status: "In development",
     summary:
       "A runtime that executes AI agents across browser, sandbox and desktop, captures evidence for every claim, recovers from tool failures and scores each run.",
     overview: [
@@ -381,7 +379,6 @@ export const work: CaseStudy[] = [
     category: "Civic & infrastructure",
     year: "2026",
     role: "Backend engineer",
-    status: "In development",
     summary:
       "Crowd-sourced electricity outage tracking for Nigeria — a six-level geographic hierarchy, map-based reporting, and outage clustering built for the Orange internship programme.",
     overview: [
@@ -622,7 +619,6 @@ export const work: CaseStudy[] = [
     category: "Education",
     year: "2026",
     role: "Lead engineer",
-    status: "In development",
     summary:
       "A full LMS with four distinct workspaces, realtime channels, Paystack billing, and externally verifiable certificates rendered to PDF and PNG.",
     overview: [
@@ -800,7 +796,6 @@ export const work: CaseStudy[] = [
     category: "Commerce & marketplace",
     year: "2026",
     role: "Author",
-    status: "In development",
     summary:
       "A modular-monolith commerce platform: 24 hexagonal modules, 150+ routes, 31 relational models — storefront, admin dashboard and API in one process.",
     overview: [
@@ -887,7 +882,6 @@ export const work: CaseStudy[] = [
     category: "Commerce & marketplace",
     year: "2026",
     role: "Author",
-    status: "In development",
     summary:
       "A multi-tenant point-of-sale system — shifts, sales, suppliers, purchase orders, loyalty and crypto settlement — with four role-specific portals on one Fastify process.",
     overview: [
@@ -1059,7 +1053,6 @@ export const work: CaseStudy[] = [
     category: "Product & interface",
     year: "2026",
     role: "Designer & engineer",
-    status: "In development",
     summary:
       "A thirty-page corporate site built by a Python generator — no framework, no npm, no build toolchain — governed by a written design specification the code must obey.",
     overview: [

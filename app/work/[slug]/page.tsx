@@ -34,6 +34,17 @@ export default async function CaseStudyPage({ params }: Props) {
   const idx = work.findIndex((w) => w.slug === slug);
   const next = work[(idx + 1) % work.length];
 
+  /* The rail paints its dividers with a background showing through 1px
+     gaps, so an unfilled track reads as an empty box rather than as
+     nothing. Projects that carry no status get a three-column rail
+     instead of a four-column one with a hole in it. */
+  const meta: [string, string][] = [
+    ["Role", project.role],
+    ["Year", project.year],
+    ...(project.status ? ([["Status", project.status]] as [string, string][]) : []),
+    ["Type", project.kind],
+  ];
+
   return (
     <article>
       <Banner project={project} index={idx} />
@@ -41,13 +52,12 @@ export default async function CaseStudyPage({ params }: Props) {
       <div className="shell">
         {/* Meta rail ---------------------------------------------------- */}
         <Reveal>
-          <dl className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["Role", project.role],
-              ["Year", project.year],
-              ["Status", project.status],
-              ["Type", project.kind],
-            ].map(([k, v]) => (
+          <dl
+            className={`grid gap-px overflow-hidden rounded-2xl border border-line bg-line ${
+              meta.length === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"
+            }`}
+          >
+            {meta.map(([k, v]) => (
               <div key={k} className="bg-stage-2/70 px-6 py-5">
                 <dt className="label">{k}</dt>
                 <dd className="mt-2 text-sm text-ink">{v}</dd>

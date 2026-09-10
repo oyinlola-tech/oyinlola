@@ -50,7 +50,7 @@ function projectFile(slug: string): File {
       const p = work.find((w) => w.slug === slug)!;
       const out: Line[] = [
         L(p.name, "head"),
-        L(`${p.kind} · ${p.year} · ${p.status}`, "dim"),
+        L([p.kind, p.year, p.status].filter(Boolean).join(" · "), "dim"),
         BLANK,
         ...wrap(p.summary, 74).map((t) => L(t, "out")),
         BLANK,

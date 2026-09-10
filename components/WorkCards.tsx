@@ -5,6 +5,7 @@ import ProjectSigil from "./ProjectSigil";
 import Reveal from "./Reveal";
 
 export function StatusChip({ status }: { status: CaseStudy["status"] }) {
+  if (!status) return null;
   const live = status === "Live";
   return (
     <span
