@@ -34,7 +34,7 @@ const routes: RouteEntry[] = [
 
 export default function NotFound() {
   return (
-    <section className="err-stage shell grid min-h-[88svh] content-center gap-14 py-32 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
+    <section className="err-stage shell grid min-h-[84svh] content-center gap-14 py-28 lg:grid-cols-[1.05fr_0.9fr] lg:gap-20">
       <div className="err-bloom" aria-hidden="true" />
 
       <div className="relative">
@@ -75,7 +75,9 @@ export default function NotFound() {
         </div>
       </div>
 
-      <div className="relative lg:pt-[6.5rem]">
+      {/* Centred against the tall left column rather than pinned to the top,
+          which left the two halves visibly unbalanced. */}
+      <div className="relative lg:self-center">
         <NearestRoutes routes={routes} />
       </div>
     </section>
