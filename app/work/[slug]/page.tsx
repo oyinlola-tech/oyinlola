@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
-import { work, workBySlug, type CaseStudy } from "@/content/work";
+import { work, workBySlug, workOrdered, workPosition, type CaseStudy } from "@/content/work";
 import { pageMeta } from "@/lib/seo";
 import ProjectSigil from "@/components/ProjectSigil";
 import Reveal from "@/components/Reveal";
@@ -31,8 +31,10 @@ export default async function CaseStudyPage({ params }: Props) {
   const project = workBySlug[slug];
   if (!project) notFound();
 
-  const idx = work.findIndex((w) => w.slug === slug);
-  const next = work[(idx + 1) % work.length];
+  /* Numbered and sequenced by display order rather than array position, so a
+     case study shows the same number the Work index gave it. */
+  const idx = workPosition[slug];
+  const next = workOrdered[(idx + 1) % workOrdered.length];
 
   /* The rail paints its dividers with a background showing through 1px
      gaps, so an unfilled track reads as an empty box rather than as

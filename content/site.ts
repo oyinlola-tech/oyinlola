@@ -50,6 +50,21 @@ export const nav: NavItem[] = [
   { label: "Contact", href: "/contact", glyph: "contact", cta: true },
 ];
 
+/**
+ * The number a page prints in its masthead.
+ *
+ * The footer index rail numbers the nav by position, so an interior page that
+ * types its own literal is one edit away from contradicting it — and three of
+ * them did: About said 02 (colliding with Engineering), CV 06 and Contact 05.
+ * Reading the position back out of `nav` is what keeps the two in step when
+ * the order changes.
+ */
+export function navIndex(href: string): string {
+  const i = nav.findIndex((item) => item.href === href);
+  if (i === -1) throw new Error(`navIndex: "${href}" is not in nav`);
+  return String(i + 1).padStart(2, "0");
+}
+
 /** Hero telemetry. Every figure is countable in a repository. */
 export const telemetry = [
   { value: "74", label: "Go modules", detail: "Zudomart · 5 domains" },

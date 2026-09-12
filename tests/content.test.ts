@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { work, workCount, workCountWord, categories } from "@/content/work";
-import { disciplines, telemetry, nav } from "@/content/site";
+import { readFileSync } from "node:fs";
+import {
+  work,
+  workCount,
+  workCountWord,
+  categories,
+  workOrdered,
+  workPosition,
+} from "@/content/work";
+import { disciplines, telemetry, nav, navIndex } from "@/content/site";
 import { experiments } from "@/content/lab";
 
 /**
@@ -17,6 +25,8 @@ import { experiments } from "@/content/lab";
  *   - two case studies were given the same hue, which the sigils render from
  *   - the telemetry count on the home page drifted from the case-study list
  *   - a status value was reintroduced after being deliberately removed
+ *   - three page mastheads typed a nav number and contradicted the footer
+ *   - the Work index and a case study numbered the same project differently
  *
  * The shape of the data is TypeScript's job. This file checks the things a
  * type cannot: uniqueness, cross-references, and agreement between two
@@ -181,5 +191,65 @@ describe("routes", () => {
       .filter((d) => d.isDirectory() && /boom|test|tmp|scratch/i.test(d.name))
       .map((d) => d.name);
     expect(strays).toEqual([]);
+  });
+});
+
+describe("numbering", () => {
+  /* Every number the site prints for a page or a project is a second copy of
+     an ordering that already exists. These are the assertions that stop the
+     copy from drifting away from the original. */
+
+  it("numbers the nav from its own order", () => {
+    nav.forEach((item, i) => {
+      expect(navIndex(item.href)).toBe(String(i + 1).padStart(2, "0"));
+    });
+  });
+
+  it("refuses to number a route that is not in the nav", () => {
+    expect(() => navIndex("/not-a-page")).toThrow();
+  });
+
+  it("lets no page type its own masthead number", () => {
+    // About said 02 while the footer said 04, CV said 06 against 05, Contact
+    // 05 against 06 — each one a literal that nothing checked. A page must
+    // read the number out of `nav` instead of restating it.
+    //
+    // Only the masthead is in scope: the numbers a page prints down its own
+    // sections ("02 Also on GitHub") count a different thing and are free to
+    // stay literal.
+    const offenders: string[] = [];
+    for (const item of nav) {
+      const rel = `app${item.href}/page.tsx`;
+      const src = readFileSync(join(ROOT, rel), "utf8");
+      if (/index="\d/.test(src)) offenders.push(`${rel}: literal masthead index`);
+      if (!src.includes(`navIndex("${item.href}")`)) {
+        offenders.push(`${rel}: masthead does not call navIndex("${item.href}")`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("orders case studies featured-first, every slug once", () => {
+    expect(workOrdered).toHaveLength(work.length);
+    expect(new Set(workOrdered.map((w) => w.slug)).size).toBe(work.length);
+
+    const featured = work.filter((w) => w.featured).length;
+    const flags = workOrdered.map((w) => w.featured);
+    expect(flags.slice(0, featured).every(Boolean)).toBe(true);
+    expect(flags.slice(featured).some(Boolean)).toBe(false);
+  });
+
+  it("gives every case study one number, wherever it is painted", () => {
+    // utils-tool is featured but ninth in `work`, so numbering by array
+    // position showed it as 09 on its own page and 07 on the index.
+    expect(Object.keys(workPosition)).toHaveLength(work.length);
+    workOrdered.forEach((w, i) => {
+      expect(workPosition[w.slug], `${w.slug} is out of step`).toBe(i);
+    });
+  });
+
+  it("keeps the case study off array position for its number", () => {
+    const src = readFileSync(join(ROOT, "app/work/[slug]/page.tsx"), "utf8");
+    expect(src).not.toMatch(/findIndex/);
   });
 });

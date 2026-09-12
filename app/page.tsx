@@ -5,7 +5,7 @@ import Hero from "@/components/hero/Hero";
 import SectionHead from "@/components/SectionHead";
 import Reveal from "@/components/Reveal";
 import { FeatureRow } from "@/components/WorkCards";
-import { work } from "@/content/work";
+import { work, workPosition } from "@/content/work";
 import { disciplines, principles, site } from "@/content/site";
 import Terminal from "@/components/terminal/Terminal";
 import { pageMeta } from "@/lib/seo";
@@ -40,7 +40,12 @@ export default function Home() {
 
         <div className="space-y-4 lg:space-y-6">
           {featured.map((project, i) => (
-            <FeatureRow key={project.slug} project={project} index={i} flip={i % 2 === 1} />
+            <FeatureRow
+              key={project.slug}
+              project={project}
+              index={workPosition[project.slug]}
+              flip={i % 2 === 1}
+            />
           ))}
         </div>
 

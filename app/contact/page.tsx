@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import ContactForm from "@/components/ContactForm";
-import { site, links } from "@/content/site";
+import { site, links, navIndex } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
   title: "Contact",
@@ -34,7 +34,7 @@ export default function ContactPage() {
   return (
     <>
       <PageHeader
-        index="05"
+        index={navIndex("/contact")}
         label="Contact"
         title="Tell me what you're building."
         lede={

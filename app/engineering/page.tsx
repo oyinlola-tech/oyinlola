@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
-import { disciplines } from "@/content/site";
+import { disciplines, navIndex } from "@/content/site";
 import { work } from "@/content/work";
 
 export const metadata: Metadata = pageMeta({
@@ -18,7 +18,7 @@ export default function EngineeringPage() {
   return (
     <>
       <PageHeader
-        index="02"
+        index={navIndex("/engineering")}
         label="Engineering"
         title="Five layers, one problem."
         lede={

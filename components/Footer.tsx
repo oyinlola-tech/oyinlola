@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, ArrowUp } from "lucide-react";
-import { site, links, nav, focus } from "@/content/site";
+import { site, links, nav, focus, navIndex } from "@/content/site";
 import FooterMark from "./footer/FooterMark";
 import LocalClock from "./footer/LocalClock";
 
@@ -76,10 +76,10 @@ export default function Footer() {
         <nav className="lg:col-span-4" aria-label="Footer pages">
           <p className="label">Index</p>
           <ul className="mt-5 space-y-3">
-            {nav.map((item, i) => (
+            {nav.map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="footer-row group">
-                  <span className="footer-row__i">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="footer-row__i">{navIndex(item.href)}</span>
                   <span className="link-wipe text-[0.95rem] text-ink-dim transition-colors group-hover:text-ink">
                     {item.label}
                   </span>

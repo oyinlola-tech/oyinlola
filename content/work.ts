@@ -2076,6 +2076,26 @@ export const workCountWord = spell(work.length);
 
 export const workBySlug = Object.fromEntries(work.map((w) => [w.slug, w]));
 
+/**
+ * Display order: featured first, then the rest, each in array order.
+ *
+ * The Work index paints the featured rows above the long tail, so it numbered
+ * down that painted order, while a case study numbered itself from where it
+ * sat in `work`. Two schemes over one list, and they disagreed the moment a
+ * featured entry was not also early in the array — utils-tool showed as 07 on
+ * the index and 09 on its own page. Both now take the number from here, so
+ * flipping `featured` renumbers the index and the case study together.
+ */
+export const workOrdered: CaseStudy[] = [
+  ...work.filter((w) => w.featured),
+  ...work.filter((w) => !w.featured),
+];
+
+/** Zero-based position in display order, by slug. */
+export const workPosition: Record<string, number> = Object.fromEntries(
+  workOrdered.map((w, i) => [w.slug, i]),
+);
+
 export const categories = [...new Set(work.map((w) => w.category))];
 
 /* ------------------------------------------------------------------ *

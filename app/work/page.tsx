@@ -4,8 +4,15 @@ import { ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { FeatureRow, CompactCard } from "@/components/WorkCards";
-import { work, categories, openSource, workCount, workCountWord } from "@/content/work";
-import { links } from "@/content/site";
+import {
+  work,
+  categories,
+  openSource,
+  workCount,
+  workCountWord,
+  workPosition,
+} from "@/content/work";
+import { links, navIndex } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
   title: "Work",
@@ -30,7 +37,7 @@ export default function WorkPage() {
   return (
     <>
       <PageHeader
-        index="01"
+        index={navIndex("/work")}
         label="Work"
         title={`${workCountWord} systems, in full.`}
         lede={
@@ -60,13 +67,18 @@ export default function WorkPage() {
         <h2 className="sr-only">Case studies</h2>
         <div className="space-y-4 lg:space-y-6">
           {featured.map((project, i) => (
-            <FeatureRow key={project.slug} project={project} index={i} flip={i % 2 === 1} />
+            <FeatureRow
+              key={project.slug}
+              project={project}
+              index={workPosition[project.slug]}
+              flip={i % 2 === 1}
+            />
           ))}
         </div>
 
         <ul className="mt-4 grid gap-4 md:grid-cols-2 lg:mt-6 lg:grid-cols-3 lg:gap-6">
-          {rest.map((project, i) => (
-            <CompactCard key={project.slug} project={project} index={featured.length + i} />
+          {rest.map((project) => (
+            <CompactCard key={project.slug} project={project} index={workPosition[project.slug]} />
           ))}
         </ul>
       </section>

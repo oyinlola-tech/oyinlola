@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import PrintButton from "@/components/cv/PrintButton";
 import Reveal from "@/components/Reveal";
-import { site, links, disciplines } from "@/content/site";
+import { site, links, disciplines, navIndex } from "@/content/site";
 import {
   cvMeta,
   summary,
@@ -78,7 +78,7 @@ export default function CvPage() {
 
         <Reveal>
           <p className="label print-hide flex items-center gap-3">
-            <span className="text-accent">06</span>
+            <span className="text-accent">{navIndex("/cv")}</span>
             <span className="h-px w-8 bg-line-2" />
             Curriculum vitae
           </p>

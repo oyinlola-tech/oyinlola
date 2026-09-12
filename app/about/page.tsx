@@ -11,6 +11,7 @@ import {
   principles,
   education,
   aboutBody,
+  navIndex,
 } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
@@ -24,7 +25,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHeader
-        index="02"
+        index={navIndex("/about")}
         label="About"
         title="I build the parts you don't see."
         lede={<>{site.positioning}</>}

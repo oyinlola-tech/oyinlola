@@ -6,6 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import Terminal from "@/components/terminal/Terminal";
 import { experiments } from "@/content/lab";
+import { navIndex } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
   title: "Lab",
@@ -24,7 +25,7 @@ export default function LabPage() {
   return (
     <>
       <PageHeader
-        index="03"
+        index={navIndex("/lab")}
         label="Lab"
         title="A shell, and the things it was built to answer."
         lede={
