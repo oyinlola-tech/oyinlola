@@ -324,14 +324,16 @@ export default function PortraitCanvas({
 
     const onVis = () => {
       visible = document.visibilityState === "visible";
-      visible ? start() : stop();
+      if (visible) start();
+      else stop();
     };
     document.addEventListener("visibilitychange", onVis);
 
     const io = new IntersectionObserver(
       ([entry]) => {
         onScreen = entry.isIntersecting;
-        onScreen ? start() : stop();
+        if (onScreen) start();
+        else stop();
       },
       { threshold: 0 },
     );

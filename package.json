@@ -2,13 +2,17 @@
   "name": "oyinlola-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "Portfolio of Oluwayemi Oyinlola Michael — software engineer.",
+  "description": "Portfolio of Oluwayemi Oyinlola Michael \u2014 software engineer.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "lint": "oxlint --deny-warnings app components lib content scripts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:links": "node scripts/check-links.mjs",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -25,7 +29,9 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.185.4",
+    "oxlint": "^1.82.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   }
 }

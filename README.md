@@ -33,18 +33,20 @@ the contact endpoint.
 each was read out of the corresponding repository, not estimated. If you can't
 count it in the source, don't put it in `content/work.ts`.
 
-**Every link is checked.** All thirty external URLs the site renders returned
-HTTP 200 (LinkedIn returns 999 to bots — that's expected, and it comes from
-the CV). Projects whose repositories are private, or whose deployments have
-gone down, carry **no link** rather than a broken one. That is why Zudomart,
-Telente CBT, AgentLab, PowerWatch and the Newdich site have no source link,
-and why several `*.telente.site` and `*.vercel.app` deployments that no longer
-resolve are absent.
+**Every link is checked.** Every external URL the site renders returns HTTP
+200 — the count is whatever `npm run check:links` reports, deliberately not a
+number written here that would drift from it. Projects whose repositories are
+private, or whose deployments have gone down, carry **no link** rather than a
+broken one. That is why Zudomart, Telente CBT, AgentLab, PowerWatch, IKALE and
+the Newdich site have no source link, and why several `*.telente.site` and
+`*.vercel.app` deployments that no longer resolve are absent.
 
-Before adding a link:
+These two rules used to be promises kept by hand, which meant they had a
+shelf life. They are now checked:
 
 ```bash
-curl -sL -o /dev/null -w "%{http_code}\n" -A "Mozilla/5.0" "<url>"
+npm test           # content invariants — see below
+npm run check:links   # every URL in content/, for real
 ```
 
 **Facts come from the source.** Profile, bio, CV history, email and phone are
@@ -58,12 +60,45 @@ schema, route table and package manifest.
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build      # prerenders all 23 routes
+npm run build      # prerenders every route
 npm start
-npm run typecheck
 ```
 
-Node 20+. The build fetches Inter, Inter Tight and JetBrains Mono once through
+### Checks
+
+```bash
+npm run verify     # lint + typecheck + test + build — exactly what CI runs
+npm run lint       # oxlint
+npm run typecheck  # tsc --noEmit
+npm test           # content invariants (vitest)
+npm run check:links   # hits every external URL in content/ (slow, networked)
+```
+
+`npm run verify` is the whole gate in the order CI runs it, cheapest first, so
+a green local run means a green push. Link checking is deliberately *not* in
+that gate: a link dies for reasons unrelated to the commit that happens to be
+pushed when it is noticed, so it runs weekly on a schedule instead
+(`.github/workflows/links.yml`) and on demand.
+
+**What the content tests cover.** The site is a static render of
+`content/*.ts`, so a mistake there ships with nothing in between to catch it.
+`tests/content.test.ts` asserts the things a type cannot: unique slugs, unique
+hues (two case studies sharing one makes two projects render the same colour),
+no dangling cross-references from `disciplines[].evidence` or the lab page
+into `/work/<slug>`, every sitemap and nav route having a real `page.tsx`, and
+agreement between the two places that state the case-study count. Every one of
+those corresponds to a mistake actually made in this repository, not a
+hypothetical one.
+
+**A note on linting.** `next lint` was removed in Next 16, so the old script
+resolved to `next <dir>` and failed with *"no such directory: lint"* — this
+repo had a lint command that could never have run. The natural replacement,
+`eslint-config-next`, pulls in `typescript-eslint`, which refuses to load
+against the TypeScript 7 this project uses. `oxlint` covers the same ground
+without a TypeScript-version dependency; swap back when typescript-eslint
+supports TS 7.
+
+Node 24+. The build fetches Inter, Inter Tight and JetBrains Mono once through
 `next/font/google` and self-hosts them, so the deployed site makes no
 third-party font request — but the *build machine* needs network access.
 

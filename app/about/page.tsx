@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import Portrait from "@/components/portrait/Portrait";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import {
   site,
-  links,
   experience,
   principles,
   education,

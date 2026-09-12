@@ -1,0 +1,22 @@
+name: Links
+
+# Link rot is not caused by a commit, so checking it on push would only
+# fail builds for reasons the commit did not introduce. This runs weekly and
+# on demand instead, and the failure is a to-do rather than a broken build.
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Check every URL in content/
+        run: node scripts/check-links.mjs

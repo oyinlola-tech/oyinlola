@@ -1,0 +1,15 @@
+# Dependencies for bake-portraits.py, the tool that produced the twelve
+# stylised assets committed under public/. Pinned to the versions the
+# current assets were baked with, so a re-bake reproduces them rather than
+# quietly producing different output from a newer filter implementation.
+#
+#   python3 -m venv .venv && . .venv/bin/activate
+#   pip install -r scripts/requirements.txt
+#   python3 scripts/bake-portraits.py
+#
+# Note: the inputs live in source-photos/, which is git-ignored. Only the
+# owner can re-run this; for everyone else it documents how the assets were
+# made rather than being reproducible.
+numpy==2.4.6
+scipy==1.17.1
+pillow==12.3.0

@@ -14,7 +14,7 @@ function distance(a: string, b: string) {
   if (!b.length) return a.length;
 
   let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
-  const row = new Array<number>(b.length + 1);
+  const row: number[] = Array.from({ length: b.length + 1 }, () => 0);
 
   for (let i = 1; i <= a.length; i++) {
     row[0] = i;
