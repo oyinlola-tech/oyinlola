@@ -67,7 +67,7 @@ export function navIndex(href: string): string {
 
 /** Hero telemetry. Every figure is countable in a repository. */
 export const telemetry = [
-  { value: "74", label: "Go modules", detail: "Zudomart · 5 domains" },
+  { value: "79", label: "Go modules", detail: "Zudomart · 5 domains" },
   { value: "39", label: "TS packages", detail: "Zudojs framework" },
   // Literal rather than derived from `work`: content/site.ts is imported by
   // the OG image route, which has a 500KB bundle budget, and pulling the whole
@@ -244,27 +244,6 @@ export const experience: Role[] = [
       "Service design, API contracts and data modelling across the platform.",
     ],
   },
-  {
-    title: "Senior Full Stack Engineer",
-    org: "TechVenture Solutions",
-    period: "2022 — 2023",
-    points: [
-      "Introduced test-first engineering patterns and raised coverage from near-zero to production-grade thresholds.",
-      "Built and maintained scalable backend APIs used by business-critical products.",
-      "Improved deployment reliability with automated CI/CD checks and safer release workflows.",
-      "Mentored junior engineers through code review, pairing and architecture walkthroughs.",
-    ],
-  },
-  {
-    title: "Full Stack Developer",
-    org: "Digital Innovations Ltd",
-    period: "2021 — 2022",
-    points: [
-      "Delivered web products end to end across frontend, backend and deployment setup.",
-      "Optimised data access paths and improved query performance in high-usage modules.",
-      "Converted business requirements into stable releases with product and operations teams.",
-    ],
-  },
 ];
 
 export type Education = { title: string; org: string; period: string; note?: string };
@@ -289,7 +268,7 @@ export type Principle = { title: string; body: string };
 export const principles: Principle[] = [
   {
     title: "Boundaries before frameworks",
-    body: "Most systems fail at the seams, not in the middle. I draw module boundaries and type contracts first, then pick the framework that fits them — which is why Zudomart is 74 Go modules in one deployable, not 74 services.",
+    body: "Most systems fail at the seams, not in the middle. I draw module boundaries and type contracts first, then pick the framework that fits them — which is why Zudomart is 79 Go modules in one deployable, not 79 services.",
   },
   {
     title: "A monolith you can split",

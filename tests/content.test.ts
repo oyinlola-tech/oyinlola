@@ -253,3 +253,39 @@ describe("numbering", () => {
     expect(src).not.toMatch(/findIndex/);
   });
 });
+
+describe("Zudomart's module count", () => {
+  /* The page claimed 74 modules beside a domain breakdown that added up to
+     94, in the same paragraph. Both numbers were wrong — the repository has
+     79 — but the contradiction is the part a test can catch. */
+  const zudomart = work.find((w) => w.slug === "zudomart");
+  const heading = zudomart?.architecture.find((a) => /\d+ modules/.test(a.title));
+  const stated = Number(heading?.title.match(/(\d+) modules/)?.[1]);
+  const domains = [...(heading?.body.matchAll(/\((\d+)(?: modules)? —/g) ?? [])].map((m) =>
+    Number(m[1]),
+  );
+
+  it("breaks down into five domains", () => {
+    expect(heading, "no architecture entry states a module count").toBeDefined();
+    expect(domains).toHaveLength(5);
+  });
+
+  it("adds the domains up to the number in the heading", () => {
+    expect(domains.reduce((a, b) => a + b, 0)).toBe(stated);
+  });
+
+  it("never lists more modules in a domain than it counts", () => {
+    const listed = [...heading!.body.matchAll(/\((\d+)(?: modules)? — ([^)]+)\)/g)];
+    for (const [, count, names] of listed) {
+      expect(names.split(",").length).toBeLessThanOrEqual(Number(count));
+    }
+  });
+
+  it("states the same count everywhere it is repeated", () => {
+    expect(Number(zudomart!.metrics.find((m) => m.label === "Go modules")?.value)).toBe(stated);
+    expect(Number(telemetry.find((t) => t.label === "Go modules")?.value)).toBe(stated);
+    for (const prose of [zudomart!.summary, ...zudomart!.overview]) {
+      for (const m of prose.matchAll(/(\d+) modules/g)) expect(Number(m[1])).toBe(stated);
+    }
+  });
+});

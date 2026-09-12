@@ -17,7 +17,7 @@ export const cvMeta = {
 
 export const summary = [
   "Software engineer and backend developer building reliable, maintainable systems in Go, Python and TypeScript. I work across the whole backend lifecycle — system design, data modelling, API implementation, authentication, caching, documentation, and the Linux environment it all runs on.",
-  "My work spans a 74-module Go commerce platform, a 39-package TypeScript framework, and production services for education, savings and logistics. I have built and compared traditional monoliths, modular monoliths and microservices, and care most about keeping a system maintainable while it is still allowed to grow.",
+  "My work spans a 79-module Go commerce platform, a 39-package TypeScript framework, and production services for education, savings and logistics. I have built and compared traditional monoliths, modular monoliths and microservices, and care most about keeping a system maintainable while it is still allowed to grow.",
   "Currently deepening Python and data engineering alongside a Computer Science degree, with a continuing interest in distributed systems and application security.",
 ];
 
@@ -60,7 +60,7 @@ export const roles: CvRole[] = [
     blurb:
       "Africa-first social commerce platform combining marketplace, services, micro-gigs, live commerce and a multi-layer trust engine. Joined FasterCapital's EquityPilot programme in January 2026.",
     points: [
-      "Designed and built the backend as a single Go deployable organised into 74 modules across five bounded domains — commerce, social, creator, platform and core.",
+      "Designed and built the backend as a single Go deployable organised into 79 modules across five bounded domains — commerce, social, creator, platform and core.",
       "Chose a modular monolith over microservices and enforced it structurally: modules communicate by command, query and Kafka event, never by reaching into each other's data, so any domain can be extracted as a build change rather than a rewrite.",
       "Defined the database once as ent schemas with Atlas generating versioned migrations, removing drift between the ORM and the database across a schema this size.",
       "Built the trust engine — three-tier verification, escrow with dispute windows and automated release timers, and account-level risk scoring — as explicit state machines.",
@@ -82,31 +82,6 @@ export const roles: CvRole[] = [
       "Defined typed API contracts between services rather than shared internals, because the consumer is a team rather than a single author.",
     ],
     tech: "Node.js · TypeScript · REST APIs · PostgreSQL · Docker · Linux",
-  },
-  {
-    title: "Senior Full Stack Engineer",
-    org: "TechVenture Solutions",
-    period: "2022 — 2023",
-    blurb: "Backend APIs and delivery practice for business-critical products.",
-    points: [
-      "Introduced test-first patterns and raised coverage from near-zero to production-grade thresholds.",
-      "Built and maintained scalable backend APIs underpinning revenue-carrying products.",
-      "Improved release reliability with automated CI/CD checks and safer deployment workflows.",
-      "Mentored junior engineers through code review, pairing and architecture walkthroughs.",
-    ],
-    tech: "Node.js · TypeScript · PostgreSQL · CI/CD · Docker",
-  },
-  {
-    title: "Full Stack Developer",
-    org: "Digital Innovations Ltd",
-    period: "2021 — 2022",
-    blurb: "End-to-end web product delivery across frontend, backend and deployment.",
-    points: [
-      "Delivered web products from requirement to deployment.",
-      "Optimised data access paths and improved query performance in high-usage modules.",
-      "Worked with product and operations teams to turn business requirements into stable releases.",
-    ],
-    tech: "JavaScript · Node.js · SQL · Linux",
   },
 ];
 

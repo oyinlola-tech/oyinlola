@@ -61,7 +61,7 @@ export const experiments: Experiment[] = [
   },
   {
     title: "Architecture as a picture",
-    question: "What does a 74-module system look like?",
+    question: "What does a 79-module system look like?",
     body: "The hero draws Zudomart's real shape: five clusters sized by domain, wired internally and joined by an event spine carrying travelling pulses. Two draw calls, one Points and one LineSegments, with the reveal driven by an expanding wavefront rather than a fade.",
     tags: ["Three.js", "GLSL", "WebGL"],
     status: "Shipped",

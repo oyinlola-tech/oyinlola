@@ -41,11 +41,11 @@ export const work: CaseStudy[] = [
     year: "2023 — present",
     role: "Founder & lead engineer",
     summary:
-      "A Go modular monolith for African social commerce — 74 modules across five domains, escrow and three-tier verification, with a Python service for ranking, recommendation and fraud detection.",
+      "A Go modular monolith for African social commerce — 79 modules across five domains, escrow and three-tier verification, with a Python service for ranking, recommendation and fraud detection.",
     overview: [
       "Zudomart is an Africa-first super-app: an integrated marketplace for goods, services and micro-gigs, with live commerce, short-form video and a multi-layer trust engine. Buyers discover products through creators, live shopping, reels and communities; creators monetise through subscriptions, gifts and affiliate commissions.",
       "I founded it in 2023 and lead the engineering. In January 2026 it joined FasterCapital's EquityPilot programme, which put the current phase on milestones: harden escrow and fraud detection, pilot creator ad monetisation, and validate local payment integrations.",
-      "It is the largest system I have built. The backend is one deployable Go binary organised as 74 modules across five domains, beside a separate Python service owning everything model-shaped.",
+      "It is the largest system I have built. The backend is one deployable Go binary organised as 79 modules across five domains, beside a separate Python service owning everything model-shaped.",
       "The engineering problem was never a single feature. It was keeping commerce, social and creator concerns from bleeding into each other while all three share users, payments and a feed.",
     ],
     problem: [
@@ -56,8 +56,8 @@ export const work: CaseStudy[] = [
     ],
     architecture: [
       {
-        title: "Five domains, 74 modules",
-        body: "commerce (29 modules — products, orders, carts, payments, wallets, escrow, inventory, shipping, promotions, loyalty, taxation, refunds, disputes, POS), social (17 — posts, feeds, reels, stories, comments, reactions, reviews, follows, brands), creator (8 — creators, livestreams, subscriptions, gifts, affiliates), platform (23 — users, auth, messaging, notifications, search, AI, moderation, fraud, KYC, support, workflows, jobs, events) and core (17 — config, analytics, insights, reports, trends, recommendations, ranking).",
+        title: "Five domains, 79 modules",
+        body: "commerce (26 modules — products, categories, customers, carts, orders, payments, wallets, escrows, ledger, payouts, settlements, invoices, refunds, disputes, commissions, pricings, promotions, marketing, inventories, fulfillments, shipping, taxation, receipts, stores, wishlists, pos), social (14 — posts, feeds, stories, reels, videos, comments, reactions, likes, follows, reviews, brands, collections, jobs, audit), creator (5 — creators, livestreams, subscriptions, gifts, affiliates), platform (20 — admins, employees, api_keys, moderation, fraud, kyc, notifications, messages, mail, workflows, automation, events, jobs, support, settings, feature_flags, experimentation, integrations, achievements, audit) and core (14 — users, auths, profiles, verification, search, ai, ranking, recommendations, analytics, insights, reports, trends, subscriptions, i18n).",
       },
       {
         title: "The trust engine",
@@ -95,7 +95,7 @@ export const work: CaseStudy[] = [
       },
       {
         title: "ent + Atlas over a hand-rolled data layer",
-        body: "Code generation from schema gives compile-time safety across 74 modules touching one database. At this many entities, a runtime-typed ORM turns every migration into a manual audit.",
+        body: "Code generation from schema gives compile-time safety across 79 modules touching one database. At this many entities, a runtime-typed ORM turns every migration into a manual audit.",
       },
       {
         title: "Money as minor units, never floats",
@@ -107,7 +107,7 @@ export const work: CaseStudy[] = [
       },
     ],
     metrics: [
-      { value: "74", label: "Go modules" },
+      { value: "79", label: "Go modules" },
       { value: "5", label: "Bounded domains" },
       { value: "13k+", label: "Go source files" },
       { value: "2", label: "Runtimes (Go + Python)" },
