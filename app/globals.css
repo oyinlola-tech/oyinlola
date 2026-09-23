@@ -508,61 +508,51 @@ body {
 }
 
 /* ================================================================== *
- *  CV — print
+ *  CV paper
  *
- *  The downloadable PDF is this page printed by Chromium (see
- *  scripts/build-cv-pdf.mjs), so these rules ARE the PDF's design.
+ *  The print-only CV (components/cv/CvPaper.tsx), and so the design of the
+ *  downloadable PDF. Modelled on an engineer's computation pad: pale green
+ *  stock, a 5 mm grid inside a plain margin, a ruled title block, and a
+ *  sheet count on every page.
  *
- *  Two constraints shape it:
- *    - ATS. Applicant-tracking systems read a PDF's text in page order, so
- *      the paper layout is one column, headings use the standard names, and
- *      every contact detail and URL is printed as plain text. Nothing a
- *      parser needs is in an image or split across side-by-side columns.
- *    - Not plain white. The page is a warm paper tone with a dark masthead
- *      carrying the photograph, in the site's own ink and amber, forced
- *      through `print-color-adjust: exact` so it survives the print path.
+ *  Two Chromium facts shaped it:
+ *    - a gradient in an @page background hangs the PDF writer, so the grid
+ *      is a fixed layer instead. Fixed layers repeat on every sheet and are
+ *      clipped to the page area, which is what leaves the plain margin.
+ *    - text extraction turns letter-spacing into real spaces, so nothing
+ *      here is tracked. An ATS cannot match "E X P E R I E N C E".
  * ================================================================== */
 
-.cv-phead { display: none; }
+.cvp { display: none; }
 
 @media print {
   @page {
     size: A4;
-    margin: 12mm 13mm 13mm;
-    background: #f5f0e8;
+    margin: 13mm 14mm 15mm;
+    background: #e5ecdf;
 
+    @bottom-left {
+      content: "Oluwayemi Oyinlola Michael, CV";
+      font: 7pt ui-monospace, "DejaVu Sans Mono", monospace;
+      color: #66746b;
+    }
     @bottom-right {
-      content: "Page " counter(page) " of " counter(pages);
-      font: 7pt var(--font-mono), monospace;
-      color: #8a8173;
-      margin-bottom: 5mm;
+      content: "Sheet " counter(page) " of " counter(pages);
+      font: 7pt ui-monospace, "DejaVu Sans Mono", monospace;
+      color: #b8352a;
     }
   }
-  @page :first {
-    margin-top: 10mm;
-  }
 
-  :root {
-    --paper: #f5f0e8;
-    --paper-ink: #1d1f24;
-    --paper-ink-2: #3b3e46;
-    --paper-muted: #6a655d;
-    --paper-rule: #ddd3c4;
-    /* The site's amber, darkened until it holds 4.5:1 on the paper. */
-    --paper-accent: #a3500c;
-    --band: #0e1117;
-  }
-
-  html,
-  body {
-    background: var(--paper) !important;
-    color: var(--paper-ink) !important;
-    overflow: visible !important;
+  html {
+    background: #e5ecdf !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  body {
+    background: transparent !important;
+    overflow: visible !important;
+  }
 
-  /* Chrome for the screen, gone on paper. */
   .dock-wrap,
   .print-hide,
   footer,
@@ -570,316 +560,230 @@ body {
     display: none !important;
   }
 
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
+  .cvp {
+    --pad: #e5ecdf;
+    --pad-grid: #d0dbc9;
+    --pad-block: #eef3ea;
+    --pad-photo: #d3ddcc;
+    --ink: #18221d;
+    --ink-2: #36423b;
+    --ink-3: #5f6d64;
+    --pencil: #b8352a;
 
-  .shell {
-    max-width: none;
-    padding: 0 !important;
-  }
-
-  .cv-doc {
-    color: var(--paper-ink);
-    font-family: var(--font-sans), system-ui, sans-serif;
-    font-size: 9.2pt;
+    display: block;
+    color: var(--ink-2);
+    font-family: var(--cvp-text), "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 8.9pt;
     line-height: 1.42;
+    letter-spacing: 0;
   }
-  .cv-doc a { color: inherit; text-decoration: none; }
+  .cvp * { letter-spacing: 0; }
+  .cvp a { color: inherit; text-decoration: none; }
+  .cvp p,
+  .cvp ul,
+  .cvp dl,
+  .cvp dd,
+  .cvp h1,
+  .cvp h2,
+  .cvp h3 { margin: 0; padding: 0; }
 
-  /* Tailwind's space-y spaces with a bottom margin sized for the screen.
-     Paper gets its own rhythm, set per element below. */
-  .cv-doc [class*="space-y-"] > * { margin-block: 0 !important; }
-  .cv-section p,
-  .cv-section li,
-  .cv-section dd {
-    font-size: 8.9pt !important;
-    line-height: 1.38 !important;
+  .cvp-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 185mm;
+    height: 270mm;
+    z-index: -1;
+  }
+  .cvp-grid line {
+    stroke: var(--pad-grid);
+    stroke-width: 0.18;
   }
 
-  /* ── masthead ───────────────────────────────────────────────────── */
-  .cv-phead {
+  /* ── title block ─────────────────────────────────────────────── */
+  .cvp-tb {
     display: grid;
     grid-template-columns: 31mm 1fr;
-    gap: 7mm;
-    align-items: center;
-    padding: 6mm 7mm;
-    border-radius: 4mm;
-    background:
-      radial-gradient(90% 140% at 100% 0%, rgba(255, 176, 103, 0.16), rgba(255, 176, 103, 0) 60%),
-      var(--band);
-    color: #f4f5f7;
+    grid-template-areas:
+      "photo id"
+      "photo cells";
+    border: 0.45mm solid var(--ink);
+    background: var(--pad-block);
     break-inside: avoid;
   }
-  .cv-phead__photo {
-    width: 31mm;
-    height: 31mm;
-    border-radius: 50%;
+  .cvp-tb__photo {
+    grid-area: photo;
+    position: relative;
     overflow: hidden;
-    background: radial-gradient(100% 100% at 50% 0%, #3a3027 0%, #1a1d24 70%);
-    box-shadow: 0 0 0 0.7mm #ffb067;
+    border-right: 0.45mm solid var(--ink);
+    background: var(--pad-photo);
   }
-  .cv-phead__photo img {
+  .cvp-tb__photo img {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: auto;
-    margin-top: 1mm;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0%;
   }
-  .cv-phead__name {
-    font-family: var(--font-display), system-ui, sans-serif;
-    font-size: 21pt;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-    color: #ffffff;
+  .cvp-tb__id {
+    grid-area: id;
+    padding: 4mm 4.5mm 3.4mm;
   }
-  .cv-doc .cv-phead__title {
-    margin-top: 1.5mm;
-    font-size: 11pt;
-    font-weight: 500;
-    color: #ffb067 !important;
+  .cvp-name {
+    font-family: var(--cvp-name), sans-serif;
+    font-weight: 400;
+    font-size: 27pt;
+    line-height: 0.95;
+    color: var(--ink);
   }
-  .cv-doc .cv-phead__sub {
-    margin-top: 0.5mm;
-    font-size: 8.4pt;
-    color: #b7bcc6 !important;
+  .cvp-role {
+    margin-top: 2mm !important;
+    font-family: var(--cvp-display), sans-serif;
+    font-weight: 400;
+    font-size: 11.5pt;
+    line-height: 1.1;
+    color: var(--pencil);
   }
-  .cv-doc .cv-phead__contact {
+  .cvp-focus {
+    margin-top: 0.8mm !important;
+    font-size: 8.5pt;
+    color: var(--ink-3);
+  }
+  .cvp-tb__cells {
+    grid-area: cells;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1mm 6mm;
-    margin-top: 3.5mm;
-    padding-top: 3mm;
-    border-top: 0.25mm solid rgba(255, 255, 255, 0.14);
-    font-size: 8.2pt;
+    grid-template-columns: 0.95fr 1.2fr 1.3fr;
+    border-top: 0.45mm solid var(--ink);
   }
-  .cv-doc .cv-phead__contact li { color: #e6e8ec !important; }
-  .cv-phead__label {
-    display: inline-block;
-    min-width: 15mm;
-    font-family: var(--font-mono), monospace;
-    font-size: 6.8pt;
-    letter-spacing: 0;
+  .cvp-cell {
+    padding: 1.3mm 2.4mm 1.4mm;
+    border-left: 0.25mm solid var(--ink);
+  }
+  .cvp-cell:nth-child(3n + 1) { border-left: 0; }
+  .cvp-cell:nth-child(n + 4) { border-top: 0.25mm solid var(--ink); }
+  .cvp-cell dt {
+    font-family: var(--cvp-mono), "IBM Plex Mono", monospace;
+    font-size: 6.2pt;
+    line-height: 1.2;
     text-transform: uppercase;
-    color: #ffb067;
+    color: var(--ink-3);
+  }
+  .cvp-cell dd {
+    font-size: 8.1pt;
+    line-height: 1.3;
+    color: var(--ink);
+    overflow-wrap: anywhere;
   }
 
-  /* ── sections ───────────────────────────────────────────────────── */
-  .cv-section { margin-top: 4.6mm !important; break-inside: auto; }
-  .cv-section.grid { display: block !important; }
-  .cv-section.grid > div + div { margin-top: 4.6mm; }
-
-  .cv-rule {
-    display: flex;
-    align-items: center;
-    gap: 2.5mm;
-    margin-bottom: 2.6mm !important;
-    padding-bottom: 1.2mm !important;
-    border-bottom: 0.3mm solid var(--paper-rule) !important;
+  /* ── sections ────────────────────────────────────────────────── */
+  .cvp-sec { margin-top: 6mm; }
+  .cvp-h {
+    margin-bottom: 2.4mm !important;
+    padding-bottom: 0.9mm !important;
+    border-bottom: 0.45mm solid var(--ink);
+    font-family: var(--cvp-display), sans-serif;
+    font-weight: 400;
+    font-size: 10.5pt;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--ink);
     break-after: avoid;
   }
-  .cv-rule::before {
-    content: "";
-    width: 3.5mm;
-    height: 1.1mm;
-    border-radius: 1mm;
-    background: var(--paper-accent);
-  }
-  .cv-num { display: none !important; }
-  .cv-rule h2 {
-    font-family: var(--font-display), system-ui, sans-serif;
-    font-size: 10.5pt;
-    font-weight: 700;
-    /* No tracking: PDF text extraction turns letter-spacing into real
-       spaces, and "E X P E R I E N C E" is not a heading an ATS knows. */
-    letter-spacing: 0 !important;
-    text-transform: uppercase;
-    color: var(--paper-accent) !important;
-  }
+  .cvp-p + .cvp-p { margin-top: 1.4mm !important; }
+  .cvp-p:first-of-type { color: var(--ink); }
 
-  .cv-doc h3,
-  .cv-doc dt {
-    color: var(--paper-ink) !important;
-  }
-  .cv-doc p,
-  .cv-doc li,
-  .cv-doc dd {
-    color: var(--paper-ink-2) !important;
-  }
-  .cv-section p.cv-lede { font-size: 9.5pt !important; color: var(--paper-ink) !important; }
-  .cv-section .space-y-4 > * + * { margin-top: 1.6mm !important; }
-
-  /* Skill rows: one column, label then list, so a parser never reads a
-     line straight across two unrelated rows. */
-  .cv-skills {
-    display: block !important;
-  }
-  .cv-skills > div {
-    display: grid !important;
-    grid-template-columns: 44mm 1fr;
+  /* Label and value on one line: skills, soft skills, certifications. */
+  .cvp-rows > div {
+    display: grid;
+    grid-template-columns: 34mm 1fr;
     gap: 3mm;
-    padding: 0.9mm 0;
-    border-bottom: 0.2mm dotted var(--paper-rule);
+    padding: 0.45mm 0;
+    break-inside: avoid;
   }
-  .cv-skills > div:last-child { border-bottom: 0; }
-  .cv-skills dt,
-  .cv-skills dd { grid-column: auto !important; }
-  .cv-skills dt {
-    padding-top: 0 !important;
-    font-family: var(--font-sans), system-ui, sans-serif !important;
-    font-size: 8.6pt !important;
-    font-weight: 600 !important;
-    letter-spacing: 0 !important;
-    text-transform: none !important;
+  .cvp-rows dt {
+    font-weight: 600;
+    font-size: 8.6pt;
+    color: var(--ink);
   }
-  .cv-skills dd { font-size: 8.7pt !important; line-height: 1.4 !important; }
-  .cv-skills > div { break-inside: avoid; }
+  .cvp-rows dd { font-size: 8.6pt; }
+  .cvp-rows--wide > div { grid-template-columns: 48mm 1fr; }
 
-  /* ── entries (roles and projects) ──────────────────────────────── */
-  .cv-section .space-y-12 > * + *,
-  .cv-section .space-y-11 > * + * {
-    margin-top: 2.6mm !important;
-    padding-top: 2.6mm;
-    border-top: 0.2mm solid var(--paper-rule);
+  /* ── entries ─────────────────────────────────────────────────── */
+  /* Entries are short enough to keep whole; a split left one bullet
+     stranded at the top of the next sheet. */
+  .cvp-entry { break-inside: avoid; }
+  .cvp-entry + .cvp-entry { margin-top: 3.6mm; }
+  .cvp-entry--flat + .cvp-entry--flat { margin-top: 1.8mm; }
+  .cvp-entry__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4mm;
+    break-after: avoid;
   }
-  /* Full-width text; the date (or the role, on a project) sits in the
-     title row's right edge rather than taking a column of its own. */
-  /* An entry may split across pages — holding every project whole left a
-     quarter-page hole before each one that did not fit. The title keeps
-     its first lines with it, and a bullet is never cut in half. */
-  .cv-entry {
-    display: block !important;
-    position: relative;
-    break-inside: auto !important;
+  .cvp-entry h3 {
+    font-weight: 600;
+    font-size: 9.6pt;
+    line-height: 1.3;
+    color: var(--ink);
   }
-  .cv-entry h3,
-  .cv-entry .cv-org,
-  .cv-entry .cv-line,
-  .cv-entry .cv-blurb { break-after: avoid; }
-  .cv-bullets li,
-  .cv-tech,
-  .cv-links { break-inside: avoid; }
-  .cv-doc { orphans: 3; widows: 3; }
-  .cv-doc * { letter-spacing: 0 !important; }
-  .cv-entry.print-hide { display: none !important; }
-  .cv-entry > :first-child {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .cvp-org { font-weight: 600; }
+  .cvp-org--quiet {
+    margin-left: 1mm;
+    font-weight: 400;
+    font-size: 8.3pt;
+    color: var(--ink-3);
   }
-  .cv-section .space-y-12 > * + * > :first-child,
-  .cv-section .space-y-11 > * + * > :first-child {
-    top: 2.6mm;
-  }
-  .cv-entry h3 { padding-right: 45mm; }
-  .cv-period {
-    padding-top: 0.6mm;
-    font-family: var(--font-mono), monospace !important;
-    font-size: 7.6pt !important;
-    letter-spacing: 0 !important;
-    text-transform: none !important;
+  .cvp-when {
+    flex-shrink: 0;
+    font-family: var(--cvp-mono), "IBM Plex Mono", monospace;
+    font-size: 7.4pt;
+    color: var(--ink-3);
     white-space: nowrap;
-    color: var(--paper-muted) !important;
   }
-  .cv-entry h3 {
-    font-family: var(--font-display), system-ui, sans-serif;
-    font-size: 10.8pt !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.005em;
+  .cvp-note {
+    margin-top: 0.4mm !important;
+    font-size: 8.6pt;
+    color: var(--ink-3);
+    break-after: avoid;
   }
-  .cv-org {
-    margin-top: 0.3mm !important;
-    font-size: 9pt !important;
-    font-weight: 600;
-    color: var(--paper-accent) !important;
-  }
-  .cv-org span { color: var(--paper-muted) !important; font-weight: 400; }
-  .cv-blurb,
-  .cv-line {
-    margin-top: 0.8mm !important;
-    font-size: 9pt !important;
-    line-height: 1.42 !important;
-  }
-  .cv-blurb { color: var(--paper-muted) !important; font-style: italic; }
-  .cv-line { color: var(--paper-ink) !important; }
+  .cvp-note--lead { color: var(--ink-2); }
 
-  .cv-bullets { margin-top: 1.2mm !important; }
-  .cv-bullets > * + *,
-  .cv-dev > * + * { margin-top: 0.5mm !important; }
-  .cv-bullets li,
-  .cv-dev li {
-    padding-left: 3.6mm !important;
-    font-size: 8.9pt !important;
-    line-height: 1.42 !important;
-  }
-  .cv-doc li::before {
-    top: 0.62em !important;
-    width: 1.2mm !important;
-    height: 1.2mm !important;
-    background: var(--paper-accent) !important;
-  }
-
-  .cv-tech,
-  .cv-links {
+  .cvp-list {
     margin-top: 1mm !important;
-    font-size: 7.6pt !important;
-    line-height: 1.45 !important;
-    color: var(--paper-muted) !important;
+    list-style: none;
   }
-  .cv-tech__label {
-    font-weight: 600;
-    color: var(--paper-ink-2) !important;
+  .cvp-list li {
+    position: relative;
+    padding-left: 3.4mm;
+    break-inside: avoid;
   }
-  .cv-links { display: block !important; }
-  .cv-links > span { margin-right: 4mm; color: var(--paper-muted) !important; }
-  .cv-links a { color: var(--paper-accent) !important; }
-  .link-wipe::after { display: none !important; }
+  .cvp-list li + li { margin-top: 0.35mm; }
+  .cvp-list li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--ink-3);
+  }
 
-  /* Education, certifications, development: compact, one column. */
-  .cv-section dl.space-y-6 > * + * { margin-top: 2mm !important; }
-  .cv-section .cv-org { font-size: 9pt !important; }
-  .cv-section .cv-tech,
-  .cv-section .cv-links { font-size: 7.6pt !important; }
-  .cv-section dl dt.font-display { font-size: 9.8pt !important; font-weight: 600 !important; }
-  /* Development areas as one flowing line rather than six rows. */
-  .cv-dev { display: block !important; }
-  .cv-dev li {
-    display: inline;
-    padding-left: 0 !important;
+  .cvp-tech {
+    margin-top: 0.9mm !important;
+    font-family: var(--cvp-mono), "IBM Plex Mono", monospace;
+    font-size: 7.1pt;
+    line-height: 1.45;
+    color: var(--ink-3);
+    break-inside: avoid;
   }
-  .cv-dev li::before { display: none; }
-  .cv-dev li + li::before {
-    content: " · ";
-    display: inline;
-    position: static;
-    width: auto !important;
-    height: auto !important;
-    border-radius: 0;
-    background: none !important;
-    color: var(--paper-accent);
+
+  .cvp-more {
+    margin-top: 3.2mm !important;
+    font-size: 8.6pt;
+    color: var(--ink-2);
   }
-  .cv-dev > * + * { margin-top: 0 !important; }
+  .cvp-more a { color: var(--ink); font-weight: 600; }
 
-  /* Certifications: title, issuer and note on one line each. */
-  .cv-certs > div { display: block; }
-  .cv-certs dt,
-  .cv-certs dd { display: inline !important; }
-  .cv-certs dd.cv-org::before { content: " — "; white-space: pre; color: var(--paper-muted); }
-  .cv-certs dd.cv-blurb::before { content: " · "; font-style: normal; }
-
-  .cv-more {
-    display: block !important;
-    margin-top: 3mm !important;
-    padding: 2mm 3mm;
-    border-radius: 1.5mm;
-    background: #ebe3d6;
-    font-size: 8.4pt !important;
-    color: var(--paper-ink-2) !important;
-  }
-  .cv-more a { color: var(--paper-accent) !important; font-weight: 600; }
-
-  .cv-block { break-inside: avoid; page-break-inside: avoid; }
+  .cvp { orphans: 3; widows: 3; }
 }
 
 /* ================================================================== *

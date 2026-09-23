@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import DownloadButton from "@/components/cv/DownloadButton";
+import CvPaper from "@/components/cv/CvPaper";
 import Reveal from "@/components/Reveal";
 import { site, links, disciplines, navIndex } from "@/content/site";
 import { workBySlug, workCount } from "@/content/work";
@@ -26,7 +27,7 @@ export const metadata: Metadata = pageMeta({
   title: `${site.name} — CV`,
   absoluteTitle: true,
   description:
-    `Curriculum vitae for ${site.name} — software engineer and backend developer in ${site.location}. Go, Python and TypeScript; distributed systems, data engineering and application security.`,
+    `Curriculum vitae for ${site.name} — software engineer in ${site.location}. Go, Python and TypeScript; distributed systems, data engineering and application security.`,
   path: "/cv",
 });
 
@@ -80,32 +81,11 @@ function Bullets({ items }: { items: string[] }) {
 
 export default function CvPage() {
   return (
-    <div className="shell cv-doc pb-24 pt-36 sm:pt-44 lg:pb-32 lg:pt-52">
-      {/* ── Paper masthead ───────────────────────────────────────────
-          Only exists on the PDF: a dark band carrying the photograph and
-          every contact line, so the page reads as designed rather than as
-          a screen printed out. */}
-      <header className="cv-phead hidden">
-        <div className="cv-phead__photo">
-          <Image src="/cv-headshot.webp" alt={`Photograph of ${site.name}`} width={560} height={700} priority />
-        </div>
-        <div className="cv-phead__body">
-          <h1 className="cv-phead__name">{site.name}</h1>
-          <p className="cv-phead__title">{cvMeta.title}</p>
-          <p className="cv-phead__sub">{cvMeta.subtitle}</p>
-          <ul className="cv-phead__contact">
-            {contact.map((c) => (
-              <li key={c.label}>
-                <span className="cv-phead__label">{c.label}:</span>{" "}
-                {c.href ? <a href={c.href}>{c.value}</a> : c.value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </header>
-
+    <>
+    <CvPaper />
+    <div className="shell cv-doc print-hide pb-24 pt-36 sm:pt-44 lg:pb-32 lg:pt-52">
       {/* ── Screen masthead ──────────────────────────────────────── */}
-      <header className="cv-block print-hide relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+      <header className="cv-block relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
         <div>
           <Reveal>
             <p className="label flex items-center gap-3">
@@ -183,7 +163,7 @@ export default function CvPage() {
 
       {/* ── Summary ──────────────────────────────────────────────── */}
       <section className="cv-section mt-20">
-        <Head n="01">Professional summary</Head>
+        <Head n="01">Professional Summary</Head>
         <div className="max-w-4xl space-y-4">
           {summary.map((p, i) => (
             <p
@@ -203,7 +183,7 @@ export default function CvPage() {
       {/* ── Competencies (screen only — the skills list below carries the
             same keywords on paper without repeating them) ────────── */}
       <section className="cv-section print-hide mt-20">
-        <Head n="02">Core competencies</Head>
+        <Head n="02">Core Competencies</Head>
         <div className="grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
           {disciplines.map((d) => (
             <div key={d.id} className="cv-block">
@@ -216,7 +196,7 @@ export default function CvPage() {
 
       {/* ── Skills ───────────────────────────────────────────────── */}
       <section className="cv-section mt-20">
-        <Head n="03">Technical skills</Head>
+        <Head n="03">Technical Skills</Head>
         <dl className="cv-skills grid gap-x-10 gap-y-4 sm:grid-cols-2">
           {skills.map((s) => (
             <div key={s.label} className="cv-block grid grid-cols-12 gap-3">
@@ -229,7 +209,7 @@ export default function CvPage() {
 
       {/* ── Soft skills ──────────────────────────────────────────── */}
       <section className="cv-section mt-20">
-        <Head n="04">Soft skills</Head>
+        <Head n="04">Soft Skills</Head>
         <dl className="cv-skills grid gap-x-10 gap-y-5 sm:grid-cols-2">
           {softSkills.map((s) => (
             <div key={s.label} className="cv-block grid grid-cols-12 gap-3">
@@ -244,7 +224,7 @@ export default function CvPage() {
 
       {/* ── Experience ───────────────────────────────────────────── */}
       <section className="cv-section mt-20">
-        <Head n="05">Professional experience</Head>
+        <Head n="05">Professional Experience</Head>
         <div className="space-y-12">
           {roles.map((r) => (
             <article key={r.org} className="cv-block cv-entry grid gap-4 md:grid-cols-12 md:gap-8">
@@ -271,7 +251,7 @@ export default function CvPage() {
 
       {/* ── Projects ─────────────────────────────────────────────── */}
       <section className="cv-section mt-20">
-        <Head n="06">Selected projects</Head>
+        <Head n="06">Selected Projects</Head>
         <div className="space-y-11">
           {projects.map((p) => {
             const refs = p.slug ? (workBySlug[p.slug]?.links ?? []) : [];
@@ -348,7 +328,9 @@ export default function CvPage() {
               <div key={c.title} className="cv-block">
                 <dt className="font-display text-base font-medium tracking-tight text-ink">{c.title}</dt>
                 <dd className="cv-org mt-1 text-sm text-accent">{c.org}</dd>
-                <dd className="cv-blurb mt-2 text-[0.86rem] leading-relaxed text-muted">{c.note}</dd>
+                {c.note ? (
+                  <dd className="cv-blurb mt-2 text-[0.86rem] leading-relaxed text-muted">{c.note}</dd>
+                ) : null}
               </div>
             ))}
           </dl>
@@ -358,7 +340,7 @@ export default function CvPage() {
       {/* ── Ongoing development (screen only — the summary's last
             paragraph says the same on paper) ───────────────────────── */}
       <section className="cv-section print-hide mt-20">
-        <Head n="09">Professional development</Head>
+        <Head n="09">Professional Development</Head>
         <ul className="cv-dev grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {development.map((d) => (
             <li
@@ -374,7 +356,7 @@ export default function CvPage() {
       {/* ── Philosophy (screen only — on paper the summary already says
             this, and a CV is judged partly on its length) ──────────── */}
       <section className="cv-section print-hide mt-20">
-        <Head n="10">Engineering philosophy</Head>
+        <Head n="10">Engineering Philosophy</Head>
         <div className="max-w-4xl space-y-4">
           {philosophy.map((p, i) => (
             <p key={i} className="text-[0.98rem] leading-relaxed text-ink-dim">
@@ -394,5 +376,6 @@ export default function CvPage() {
         </a>
       </div>
     </div>
+    </>
   );
 }
