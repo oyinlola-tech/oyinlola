@@ -16,9 +16,10 @@ export const cvMeta = {
 };
 
 export const summary = [
-  "Software engineer and backend developer building reliable, maintainable systems in Go, Python and TypeScript. I work across the whole backend lifecycle — system design, data modelling, API implementation, authentication, caching, documentation, and the Linux environment it all runs on.",
-  "My work spans a 79-module Go commerce platform, a 39-package TypeScript framework, and production services for education, savings and logistics. I have built and compared traditional monoliths, modular monoliths and microservices, and care most about keeping a system maintainable while it is still allowed to grow.",
-  "Currently deepening Python and data engineering alongside a Computer Science degree, with a continuing interest in distributed systems and application security.",
+  "Backend-focused software engineer in Lagos, Nigeria, building production systems in Go, Python and TypeScript since 2023. I design and own the parts of a product users never see — APIs, data models, authentication, payments, queues, security controls and the Linux infrastructure underneath — from the first schema to the deployed service.",
+  "As founder and lead engineer of ZudoMart I designed a 79-module Go modular monolith across five bounded domains, with escrow, verification and risk scoring modelled as explicit state machines. I also author Zudojs, a 39-package open-source TypeScript framework, and have used it to ship multi-service systems such as BetNG — twelve TypeScript and Python services behind one 187-route gateway — alongside platforms for savings groups, schools, retailers, logistics and a local church.",
+  "Security runs through the work rather than beside it: SentinelX, a network intrusion detection and prevention platform with explained risk scores, and CommitGuard, a commit-provenance policy engine published to PyPI and the GitHub Marketplace. I write the tests, benchmarks and documentation that let another engineer trust a system without having to take my word for it.",
+  "Currently completing a BSc in Computer Science at the University of the People while deepening data engineering, distributed systems and application security. Open to backend, platform and software engineering roles.",
 ];
 
 export type SkillGroup = { label: string; items: string };
@@ -141,9 +142,47 @@ export const projects: CvProject[] = [
       "Independent packages for DI, lifecycle, configuration, logging, events, CQRS, HTTP, database, transactions, queues, messaging, storage, security, tenancy, feature flags and observability.",
       "Token-based dependency injection instead of decorator reflection: no compiler flag, no bundler breakage, and a dependency graph you can read.",
       "Lifecycle as a real state machine — startup ordered by declared dependencies, teardown in reverse, so a consumer can never outlive the connection it reads through.",
-      "A CLI that generates fullstack projects, plus 11 frontend framework adapters over the same backend contracts.",
+      "A CLI that generates fullstack projects, plus 11 frontend framework adapters over the same backend contracts; the foundation under BetNG and Scriptune.",
     ],
     tech: "TypeScript · Node.js · pnpm workspaces · Zod · ESM",
+  },
+  {
+    name: "BetNG",
+    role: "Author · open source",
+    slug: "betng",
+    line: "A virtual football platform where every match is simulated once and seen identically on five clients, with twelve TypeScript and Python services behind one gateway.",
+    points: [
+      "Built 12 backend services — a gateway and seven TypeScript services on Zudojs and Prisma, plus four Python services on FastAPI — each writing only its own PostgreSQL schema and calling the others over authenticated RPC.",
+      "Made the match result tamper-proof by design: betting closes before kick-off, the seed is an HMAC under a server secret, and database triggers reject any change to a committed result.",
+      "Documented 14 platform invariants, each mapped to the constraint that enforces it and the test that proves it, with 2,200+ Python tests, 171 TypeScript test files and a 22-step end-to-end scenario.",
+      "Shipped five clients (web, TV, shop and admin on React 19 and Vite, mobile on Expo) over a 187-route gateway, with money held as integer kobo end to end.",
+    ],
+    tech: "TypeScript · Zudojs · Prisma · Python · FastAPI · PostgreSQL · Redis · React · Expo · Playwright · Docker",
+  },
+  {
+    name: "SentinelX",
+    role: "Author · open source",
+    slug: "sentinelx",
+    line: "A self-hosted network intrusion detection and prevention platform where every alert shows its evidence, thresholds and risk breakdown.",
+    points: [
+      "13 detectors, a bounded YAML rule language with embedded tests, and 7 kill-chain patterns correlating detections into incidents with explained 0–100 risk scores.",
+      "Guarded prevention across 4 firewall adapters (nftables, iptables, pf, Windows Firewall): off by default, enabled only by a typed confirmation, behind a safety guard that refuses to block protected addresses.",
+      "100% detection with zero false positives across 13 synthetic attack experiments in the committed benchmark; 1,876 tests across unit, API, integration and kernel suites.",
+    ],
+    tech: "Python · FastAPI · SQLAlchemy · PostgreSQL · Redis · Scapy · Next.js · Docker · nftables",
+  },
+  {
+    name: "CommitGuard",
+    role: "Author · open source",
+    slug: "commitguard",
+    line: "Blocks AI-agent attribution in Git commit metadata — in local hooks, a GitHub Action and a webhook-driven GitHub App — from one detection engine.",
+    points: [
+      "No misjudged cases on a 9,174-case labelled dataset, reached after four of 15 recorded benchmark runs exposed bypasses; every failing run is kept in the repository.",
+      "Unicode normalisation against look-alike and invisible-character disguises, and a bounded trailer parser that uses no regular expressions.",
+      "Server-side checks read policy from the pull request's base commit, so a change cannot relax the rules judging it; every failure path blocks rather than passes.",
+      "1,452 Python tests, 354 of them security regressions; CI on Linux, macOS and Windows; published to PyPI and the GitHub Marketplace.",
+    ],
+    tech: "Python · Typer · Pydantic · SQLite · GitHub Apps · GitHub Actions · React · TypeScript · Hypothesis · Playwright",
   },
   {
     name: "Kolo",
@@ -154,10 +193,21 @@ export const projects: CvProject[] = [
       "18 controllers, 30+ services and 32 Prisma repositories on Fastify 5 over PostgreSQL and Redis.",
       "Double-entry ledger: balances are derived from entries, so a discrepancy between what a member paid and what the group holds is reconstructable rather than lost.",
       "Hardened webhook path — HMAC signature verified first, raw event persisted, then an independent out-of-band re-verification before any wallet is credited.",
-      "One database transaction per settlement covering payment status, wallet credit, ledger entries and contribution state — all four land or none do.",
       "14 BullMQ queues with 10+ processors keeping verification, payouts, notifications and reminders off the request path.",
     ],
     tech: "TypeScript · Fastify 5 · Prisma · PostgreSQL 15 · Redis 7 · BullMQ · React 19 · Nomba · Argon2",
+  },
+  {
+    name: "Scriptune",
+    role: "Author · open source",
+    slug: "scriptune",
+    line: "Hear a hymn or a Bible verse and find out what it is: one API behind a website, an iPhone app and an Android app, with self-hosted Whisper speech recognition.",
+    points: [
+      "Zudojs modular-monolith API with 9 modules, 51 routes and 29 Prisma models over PostgreSQL 17, documented with OpenAPI.",
+      "Three-stage recognition search — full-text, then pairs of the rarer words, then pg_trgm similarity — so the expensive fuzzy stage runs only when the cheap index lookups find nothing.",
+      "7 Bible translations including Yoruba and 1,200 hymns, offline on the phone through SQLite FTS5 and on-device whisper.rn transcription.",
+    ],
+    tech: "TypeScript · Zudojs · Prisma · PostgreSQL · Python · FastAPI · Whisper · Next.js · Expo · React Native",
   },
   {
     name: "Telente CBT",
@@ -172,6 +222,29 @@ export const projects: CvProject[] = [
     tech: "TypeScript · Fastify · Prisma · PostgreSQL 16 · Redis 7 · Python · FastAPI · Docker · Nginx",
   },
   {
+    name: "Church Management System",
+    role: "Author · open source",
+    slug: "church-cms",
+    line: "Records system and public website for a church in Okitipupa, Ondo State.",
+    points: [
+      "Express 5 and MySQL API with 70 endpoints over 16 tables, covering members, households, attendance, finance and public content.",
+      "Four roles mapped to 23 permissions and checked on all 53 admin endpoints; revocable JWT sessions and a write-level audit log.",
+      "40 automated tests: the real router stack against a database double, and every HTML page's scripts run under linkedom.",
+    ],
+    tech: "Node.js · Express 5 · MySQL · JWT · Multer · Tailwind CSS",
+  },
+  {
+    name: "PowerWatch",
+    role: "Backend engineer · team project",
+    slug: "powerwatch",
+    line: "Crowd-sourced electricity outage tracking for Nigeria — the backend of a team project for the Orange internship programme.",
+    points: [
+      "62 API endpoints over 20 Prisma models, including a six-level geographic hierarchy — country through neighbourhood — so one dataset answers both street-level and state-level questions.",
+      "Each report opens, joins or closes its neighbourhood's outage inside one transaction, with durations recorded in minutes and daily, weekly and monthly rollups materialised on demand.",
+    ],
+    tech: "TypeScript · Fastify · Prisma · MySQL · Firebase · Swagger",
+  },
+  {
     name: "Telente Store",
     role: "Author",
     slug: "telente-store",
@@ -184,24 +257,12 @@ export const projects: CvProject[] = [
     tech: "TypeScript 5.9 · Fastify 5 · Prisma · MySQL 8.4 · Paystack · Docker",
   },
   {
-    name: "PowerWatch",
-    role: "Backend engineer",
-    slug: "powerwatch",
-    line: "Crowd-sourced electricity outage tracking for Nigeria, built for the Orange internship programme.",
-    points: [
-      "20 Prisma models including a six-level geographic hierarchy — country through neighbourhood — so one dataset answers both street-level and state-level questions.",
-      "Reports kept immutable and outages inferred separately, so improving the clustering is a re-run rather than a data migration.",
-    ],
-    tech: "TypeScript · Fastify · Prisma · MySQL · React · MapLibre · Firebase · Swagger",
-  },
-  {
     name: "Utils-tool",
     role: "Author · live",
     slug: "utils-tool",
     line: "28 image, PDF, file and developer tools in one codebase that runs fully local or serverless.",
     points: [
       "A capability system: every tool declares its runtime needs and the server reports what it actually supports, so the UI never offers a tool that would fail.",
-      "Layered FastAPI backend with a storage abstraction resolving to the local filesystem or Vercel Blob.",
       "Magic-byte validation, hard size limits and decompression-bomb protection on a service whose entire job is accepting arbitrary files.",
     ],
     tech: "Python · FastAPI · Pillow · pikepdf · Ghostscript · rembg · HTML/CSS/JS",
@@ -213,7 +274,6 @@ export const projects: CvProject[] = [
     line: "An execution and evaluation runtime for AI agents across browser, sandbox and desktop.",
     points: [
       "Three environments behind one interface, each with an offline mock and a Solari cloud implementation, so the whole system demos in a second with no API keys.",
-      "An evidence system where every claim in an answer cites the page it came from, and a recovery-aware loop that treats a tool failure as a branch rather than an ending.",
       "Deterministic scoring across five weighted dimensions instead of an LLM judge, so two runs are comparable and a regression is measurable.",
     ],
     tech: "TypeScript · Node.js · Solari SDK · Gemini · Groq",
@@ -224,12 +284,12 @@ export const projects: CvProject[] = [
     slug: "soft-beans-palace",
     line: "Ordering experience for a Port Harcourt food business, handing off to WhatsApp instead of a payment gateway.",
     points: [
-      "Meal configuration with per-item sides, proteins, quantities and instructions, in a picker that becomes a bottom sheet on mobile and a dialog on desktop.",
       "One data file as the single source of truth for price, flowing to menu, cart, checkout and the outgoing message through one formatter.",
     ],
     tech: "Next.js · TypeScript · Tailwind CSS · Zustand · React Hook Form · Zod",
   },
 ];
+
 
 export type CvEducation = {
   title: string;
