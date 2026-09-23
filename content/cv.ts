@@ -137,6 +137,12 @@ export type CvProject = {
   name: string;
   role: string;
   slug?: string;
+  /**
+   * false keeps a project on the web CV but off the PDF. A CV is read in
+   * about a minute; the PDF carries the strongest work and points at
+   * /work for the rest.
+   */
+  paper?: boolean;
   line: string;
   points: string[];
   tech: string;
@@ -150,8 +156,7 @@ export const projects: CvProject[] = [
     line: "A 39-package modular TypeScript framework — the building blocks under a backend, rather than another HTTP framework.",
     points: [
       "Independent packages for DI, lifecycle, configuration, logging, events, CQRS, HTTP, database, transactions, queues, messaging, storage, security, tenancy, feature flags and observability.",
-      "Token-based dependency injection instead of decorator reflection: no compiler flag, no bundler breakage, and a dependency graph you can read.",
-      "Lifecycle as a real state machine — startup ordered by declared dependencies, teardown in reverse, so a consumer can never outlive the connection it reads through.",
+      "Token-based dependency injection instead of decorator reflection, and lifecycle as a real state machine — startup ordered by declared dependencies, teardown in reverse.",
       "A CLI that generates fullstack projects, plus 11 frontend framework adapters over the same backend contracts; the foundation under BetNG and Scriptune.",
     ],
     tech: "TypeScript · Node.js · pnpm workspaces · Zod · ESM",
@@ -164,8 +169,7 @@ export const projects: CvProject[] = [
     points: [
       "Built 12 backend services — a gateway and seven TypeScript services on Zudojs and Prisma, plus four Python services on FastAPI — each writing only its own PostgreSQL schema and calling the others over authenticated RPC.",
       "Made the match result tamper-proof by design: betting closes before kick-off, the seed is an HMAC under a server secret, and database triggers reject any change to a committed result.",
-      "Documented 14 platform invariants, each mapped to the constraint that enforces it and the test that proves it, with 2,200+ Python tests, 171 TypeScript test files and a 22-step end-to-end scenario.",
-      "Shipped five clients (web, TV, shop and admin on React 19 and Vite, mobile on Expo) over a 187-route gateway, with money held as integer kobo end to end.",
+      "Five clients (React 19 web, TV, shop and admin; Expo mobile) over a 187-route gateway, integer-kobo money end to end, and 14 invariants each mapped to the constraint and test that prove it — 2,200+ Python tests and 171 TypeScript test files.",
     ],
     tech: "TypeScript · Zudojs · Prisma · Python · FastAPI · PostgreSQL · Redis · React · Expo · Playwright · Docker",
   },
@@ -187,8 +191,7 @@ export const projects: CvProject[] = [
     slug: "commitguard",
     line: "Blocks AI-agent attribution in Git commit metadata — in local hooks, a GitHub Action and a webhook-driven GitHub App — from one detection engine.",
     points: [
-      "No misjudged cases on a 9,174-case labelled dataset, reached after four of 15 recorded benchmark runs exposed bypasses; every failing run is kept in the repository.",
-      "Unicode normalisation against look-alike and invisible-character disguises, and a bounded trailer parser that uses no regular expressions.",
+      "No misjudged cases on a 9,174-case labelled dataset, reached after four of 15 recorded benchmark runs exposed look-alike and invisible-character bypasses; every failing run is kept in the repository.",
       "Server-side checks read policy from the pull request's base commit, so a change cannot relax the rules judging it; every failure path blocks rather than passes.",
       "1,452 Python tests, 354 of them security regressions; CI on Linux, macOS and Windows; published to PyPI and the GitHub Marketplace.",
     ],
@@ -200,10 +203,9 @@ export const projects: CvProject[] = [
     slug: "kolo",
     line: "Digital infrastructure for Ajo and Esusu cooperative savings groups, with Nomba as the payment rail.",
     points: [
-      "18 controllers, 30+ services and 32 Prisma repositories on Fastify 5 over PostgreSQL and Redis.",
       "Double-entry ledger: balances are derived from entries, so a discrepancy between what a member paid and what the group holds is reconstructable rather than lost.",
       "Hardened webhook path — HMAC signature verified first, raw event persisted, then an independent out-of-band re-verification before any wallet is credited.",
-      "14 BullMQ queues with 10+ processors keeping verification, payouts, notifications and reminders off the request path.",
+      "18 controllers, 30+ services and 32 Prisma repositories on Fastify 5, with 14 BullMQ queues keeping verification, payouts and notifications off the request path.",
     ],
     tech: "TypeScript · Fastify 5 · Prisma · PostgreSQL 15 · Redis 7 · BullMQ · React 19 · Nomba · Argon2",
   },
@@ -256,6 +258,7 @@ export const projects: CvProject[] = [
   },
   {
     name: "Telente Store",
+    paper: false,
     role: "Author",
     slug: "telente-store",
     line: "Production e-commerce platform as a modular monolith — storefront, admin dashboard and API in one process.",
@@ -268,6 +271,7 @@ export const projects: CvProject[] = [
   },
   {
     name: "Utils-tool",
+    paper: false,
     role: "Author · live",
     slug: "utils-tool",
     line: "28 image, PDF, file and developer tools in one codebase that runs fully local or serverless.",
@@ -279,6 +283,7 @@ export const projects: CvProject[] = [
   },
   {
     name: "AgentLab",
+    paper: false,
     role: "Author",
     slug: "agentlab",
     line: "An execution and evaluation runtime for AI agents across browser, sandbox and desktop.",
@@ -290,6 +295,7 @@ export const projects: CvProject[] = [
   },
   {
     name: "Soft Beans Palace",
+    paper: false,
     role: "Designer & engineer · live",
     slug: "soft-beans-palace",
     line: "Ordering experience for a Port Harcourt food business, handing off to WhatsApp instead of a payment gateway.",

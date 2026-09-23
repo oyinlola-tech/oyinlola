@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import DownloadButton from "@/components/cv/DownloadButton";
 import Reveal from "@/components/Reveal";
 import { site, links, disciplines, navIndex } from "@/content/site";
-import { workBySlug } from "@/content/work";
+import { workBySlug, workCount } from "@/content/work";
 import {
   cvMeta,
   summary,
@@ -166,8 +166,8 @@ export default function CvPage() {
           </Reveal>
         </div>
 
-        <Reveal delay={120}>
-          <div className="relative mx-auto w-44 overflow-hidden rounded-[1.75rem] border border-line-2 bg-[radial-gradient(120%_90%_at_50%_0%,rgba(255,176,103,0.22),rgba(23,27,36,0.9)_62%)] sm:w-52 lg:mx-0 lg:w-60">
+        <Reveal delay={120} className="order-first lg:order-none">
+          <div className="relative w-36 overflow-hidden rounded-[1.75rem] border border-line-2 bg-[radial-gradient(120%_90%_at_50%_0%,rgba(255,176,103,0.22),rgba(23,27,36,0.9)_62%)] sm:w-44 lg:w-60">
             <Image
               src="/cv-headshot.webp"
               alt={`Photograph of ${site.name}`}
@@ -276,7 +276,10 @@ export default function CvPage() {
           {projects.map((p) => {
             const refs = p.slug ? (workBySlug[p.slug]?.links ?? []) : [];
             return (
-              <article key={p.name} className="cv-block cv-entry grid gap-4 md:grid-cols-12 md:gap-8">
+              <article
+                key={p.name}
+                className={`cv-block cv-entry grid gap-4 md:grid-cols-12 md:gap-8${p.paper === false ? " print-hide" : ""}`}
+              >
                 <div className="md:col-span-3">
                   <p className="cv-period label normal-case tracking-normal">{p.role}</p>
                 </div>
@@ -313,6 +316,10 @@ export default function CvPage() {
             );
           })}
         </div>
+        <p className="cv-more hidden">
+          All {workCount} case studies, with architecture and trade-offs:{" "}
+          <a href={`${links.site}/work`}>{bare(links.site)}/work</a>
+        </p>
       </section>
 
       {/* ── Education & certifications ───────────────────────────── */}
@@ -336,7 +343,7 @@ export default function CvPage() {
 
         <div>
           <Head n="08">Certifications</Head>
-          <dl className="space-y-6">
+          <dl className="cv-certs space-y-6">
             {certifications.map((c) => (
               <div key={c.title} className="cv-block">
                 <dt className="font-display text-base font-medium tracking-tight text-ink">{c.title}</dt>
@@ -348,8 +355,9 @@ export default function CvPage() {
         </div>
       </section>
 
-      {/* ── Ongoing development ──────────────────────────────────── */}
-      <section className="cv-section mt-20">
+      {/* ── Ongoing development (screen only — the summary's last
+            paragraph says the same on paper) ───────────────────────── */}
+      <section className="cv-section print-hide mt-20">
         <Head n="09">Professional development</Head>
         <ul className="cv-dev grid gap-x-10 gap-y-3 sm:grid-cols-2">
           {development.map((d) => (
@@ -363,8 +371,9 @@ export default function CvPage() {
         </ul>
       </section>
 
-      {/* ── Philosophy ───────────────────────────────────────────── */}
-      <section className="cv-section mt-20">
+      {/* ── Philosophy (screen only — on paper the summary already says
+            this, and a CV is judged partly on its length) ──────────── */}
+      <section className="cv-section print-hide mt-20">
         <Head n="10">Engineering philosophy</Head>
         <div className="max-w-4xl space-y-4">
           {philosophy.map((p, i) => (

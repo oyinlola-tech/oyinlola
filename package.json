@@ -2,7 +2,7 @@
   "name": "oyinlola-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "Portfolio of Oluwayemi Oyinlola Michael \u2014 software engineer.",
+  "description": "Portfolio of Oluwayemi Oyinlola Michael — software engineer.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:links": "node scripts/check-links.mjs",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run build"
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build",
+    "cv:pdf": "node scripts/build-cv-pdf.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

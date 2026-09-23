@@ -589,6 +589,16 @@ body {
   }
   .cv-doc a { color: inherit; text-decoration: none; }
 
+  /* Tailwind's space-y spaces with a bottom margin sized for the screen.
+     Paper gets its own rhythm, set per element below. */
+  .cv-doc [class*="space-y-"] > * { margin-block: 0 !important; }
+  .cv-section p,
+  .cv-section li,
+  .cv-section dd {
+    font-size: 8.9pt !important;
+    line-height: 1.38 !important;
+  }
+
   /* ── masthead ───────────────────────────────────────────────────── */
   .cv-phead {
     display: grid;
@@ -624,18 +634,18 @@ body {
     line-height: 1.05;
     color: #ffffff;
   }
-  .cv-phead__title {
+  .cv-doc .cv-phead__title {
     margin-top: 1.5mm;
     font-size: 11pt;
     font-weight: 500;
-    color: #ffb067;
+    color: #ffb067 !important;
   }
-  .cv-phead__sub {
+  .cv-doc .cv-phead__sub {
     margin-top: 0.5mm;
     font-size: 8.4pt;
-    color: #b7bcc6;
+    color: #b7bcc6 !important;
   }
-  .cv-phead__contact {
+  .cv-doc .cv-phead__contact {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1mm 6mm;
@@ -643,22 +653,22 @@ body {
     padding-top: 3mm;
     border-top: 0.25mm solid rgba(255, 255, 255, 0.14);
     font-size: 8.2pt;
-    color: #e6e8ec;
   }
+  .cv-doc .cv-phead__contact li { color: #e6e8ec !important; }
   .cv-phead__label {
     display: inline-block;
     min-width: 15mm;
     font-family: var(--font-mono), monospace;
     font-size: 6.8pt;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: #ffb067;
   }
 
   /* ── sections ───────────────────────────────────────────────────── */
-  .cv-section { margin-top: 5.5mm !important; break-inside: auto; }
+  .cv-section { margin-top: 4.6mm !important; break-inside: auto; }
   .cv-section.grid { display: block !important; }
-  .cv-section.grid > div + div { margin-top: 5.5mm; }
+  .cv-section.grid > div + div { margin-top: 4.6mm; }
 
   .cv-rule {
     display: flex;
@@ -679,9 +689,11 @@ body {
   .cv-num { display: none !important; }
   .cv-rule h2 {
     font-family: var(--font-display), system-ui, sans-serif;
-    font-size: 10pt;
-    font-weight: 600;
-    letter-spacing: 0.12em;
+    font-size: 10.5pt;
+    font-weight: 700;
+    /* No tracking: PDF text extraction turns letter-spacing into real
+       spaces, and "E X P E R I E N C E" is not a heading an ATS knows. */
+    letter-spacing: 0 !important;
     text-transform: uppercase;
     color: var(--paper-accent) !important;
   }
@@ -695,7 +707,7 @@ body {
   .cv-doc dd {
     color: var(--paper-ink-2) !important;
   }
-  .cv-lede { font-size: 9.6pt !important; color: var(--paper-ink) !important; }
+  .cv-section p.cv-lede { font-size: 9.5pt !important; color: var(--paper-ink) !important; }
   .cv-section .space-y-4 > * + * { margin-top: 1.6mm !important; }
 
   /* Skill rows: one column, label then list, so a parser never reads a
@@ -705,12 +717,14 @@ body {
   }
   .cv-skills > div {
     display: grid !important;
-    grid-template-columns: 38mm 1fr;
+    grid-template-columns: 44mm 1fr;
     gap: 3mm;
     padding: 0.9mm 0;
     border-bottom: 0.2mm dotted var(--paper-rule);
   }
   .cv-skills > div:last-child { border-bottom: 0; }
+  .cv-skills dt,
+  .cv-skills dd { grid-column: auto !important; }
   .cv-skills dt {
     padding-top: 0 !important;
     font-family: var(--font-sans), system-ui, sans-serif !important;
@@ -720,26 +734,50 @@ body {
     text-transform: none !important;
   }
   .cv-skills dd { font-size: 8.7pt !important; line-height: 1.4 !important; }
+  .cv-skills > div { break-inside: avoid; }
 
   /* ── entries (roles and projects) ──────────────────────────────── */
   .cv-section .space-y-12 > * + *,
   .cv-section .space-y-11 > * + * {
-    margin-top: 3.6mm !important;
+    margin-top: 2.6mm !important;
+    padding-top: 2.6mm;
+    border-top: 0.2mm solid var(--paper-rule);
   }
+  /* Full-width text; the date (or the role, on a project) sits in the
+     title row's right edge rather than taking a column of its own. */
+  /* An entry may split across pages — holding every project whole left a
+     quarter-page hole before each one that did not fit. The title keeps
+     its first lines with it, and a bullet is never cut in half. */
   .cv-entry {
-    display: grid !important;
-    grid-template-columns: 1fr auto;
-    column-gap: 4mm;
-    row-gap: 0 !important;
-    break-inside: avoid;
+    display: block !important;
+    position: relative;
+    break-inside: auto !important;
   }
-  .cv-entry > :first-child { grid-column: 2; grid-row: 1; }
-  .cv-entry > :last-child { grid-column: 1; grid-row: 1; }
+  .cv-entry h3,
+  .cv-entry .cv-org,
+  .cv-entry .cv-line,
+  .cv-entry .cv-blurb { break-after: avoid; }
+  .cv-bullets li,
+  .cv-tech,
+  .cv-links { break-inside: avoid; }
+  .cv-doc { orphans: 3; widows: 3; }
+  .cv-doc * { letter-spacing: 0 !important; }
+  .cv-entry.print-hide { display: none !important; }
+  .cv-entry > :first-child {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .cv-section .space-y-12 > * + * > :first-child,
+  .cv-section .space-y-11 > * + * > :first-child {
+    top: 2.6mm;
+  }
+  .cv-entry h3 { padding-right: 45mm; }
   .cv-period {
     padding-top: 0.6mm;
     font-family: var(--font-mono), monospace !important;
     font-size: 7.6pt !important;
-    letter-spacing: 0.03em !important;
+    letter-spacing: 0 !important;
     text-transform: none !important;
     white-space: nowrap;
     color: var(--paper-muted) !important;
@@ -800,8 +838,46 @@ body {
 
   /* Education, certifications, development: compact, one column. */
   .cv-section dl.space-y-6 > * + * { margin-top: 2mm !important; }
+  .cv-section .cv-org { font-size: 9pt !important; }
+  .cv-section .cv-tech,
+  .cv-section .cv-links { font-size: 7.6pt !important; }
   .cv-section dl dt.font-display { font-size: 9.8pt !important; font-weight: 600 !important; }
+  /* Development areas as one flowing line rather than six rows. */
   .cv-dev { display: block !important; }
+  .cv-dev li {
+    display: inline;
+    padding-left: 0 !important;
+  }
+  .cv-dev li::before { display: none; }
+  .cv-dev li + li::before {
+    content: " · ";
+    display: inline;
+    position: static;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0;
+    background: none !important;
+    color: var(--paper-accent);
+  }
+  .cv-dev > * + * { margin-top: 0 !important; }
+
+  /* Certifications: title, issuer and note on one line each. */
+  .cv-certs > div { display: block; }
+  .cv-certs dt,
+  .cv-certs dd { display: inline !important; }
+  .cv-certs dd.cv-org::before { content: " — "; white-space: pre; color: var(--paper-muted); }
+  .cv-certs dd.cv-blurb::before { content: " · "; font-style: normal; }
+
+  .cv-more {
+    display: block !important;
+    margin-top: 3mm !important;
+    padding: 2mm 3mm;
+    border-radius: 1.5mm;
+    background: #ebe3d6;
+    font-size: 8.4pt !important;
+    color: var(--paper-ink-2) !important;
+  }
+  .cv-more a { color: var(--paper-accent) !important; font-weight: 600; }
 
   .cv-block { break-inside: avoid; page-break-inside: avoid; }
 }
