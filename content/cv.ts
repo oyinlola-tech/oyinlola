@@ -9,6 +9,16 @@
  * Rule: if a number appears here, it is countable in the source.
  */
 
+/**
+ * The downloadable PDF, printed from /cv by `npm run cv:pdf`. The filename
+ * carries the owner's name because a recruiter's downloads folder is full of
+ * files called "cv.pdf".
+ */
+export const CV_PDF = {
+  filename: "Oluwayemi-Oyinlola-Michael-CV.pdf",
+  href: "/Oluwayemi-Oyinlola-Michael-CV.pdf",
+} as const;
+
 export const cvMeta = {
   title: "Software Engineer · Backend Developer",
   subtitle: "Python & data engineering · distributed systems · application security",
