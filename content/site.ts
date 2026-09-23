@@ -12,8 +12,8 @@ export const site = {
   positioning:
     "I build the systems behind useful products — backend APIs, data pipelines, developer tools, and the architecture that holds them together.",
   description:
-    "Software engineer in Nigeria. Backend systems, developer tools and data-driven applications in Go, Python and TypeScript — with a working interest in distributed systems, data engineering and application security.",
-  location: "Nigeria",
+    "Software engineer in Lagos, Nigeria. Backend systems, developer tools and data-driven applications in Go, Python and TypeScript — with a working interest in distributed systems, data engineering and application security.",
+  location: "Lagos, Nigeria",
   timezone: "WAT · UTC+1",
   email: "oluwayemioyinlola2@gmail.com",
   phone: "+234 913 351 9489",
@@ -72,7 +72,7 @@ export const telemetry = [
   // Literal rather than derived from `work`: content/site.ts is imported by
   // the OG image route, which has a 500KB bundle budget, and pulling the whole
   // case-study file in to count it would spend most of that on prose.
-  { value: "26", label: "Case studies", detail: "Shipped & in progress" },
+  { value: "30", label: "Case studies", detail: "Shipped & in progress" },
   { value: "3", label: "Core languages", detail: "Go · Python · TypeScript" },
 ] as const;
 
@@ -239,9 +239,9 @@ export const experience: Role[] = [
     period: "2025 — present",
     current: true,
     points: [
-      "Backend development in Node.js and TypeScript on Eko Xpedite Exchange with the Newdich team.",
-      "Merchant, agent and end-user flows, and the system architecture connecting them.",
-      "Service design, API contracts and data modelling across the platform.",
+      "Backend development in Node.js and TypeScript as part of the Newdich engineering team.",
+      "Service design, typed API contracts and data modelling across the team's products.",
+      "Designed and built the Newdich Technology company website.",
     ],
   },
 ];

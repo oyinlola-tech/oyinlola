@@ -402,10 +402,10 @@ export const work: CaseStudy[] = [
     year: "2026",
     role: "Backend engineer",
     summary:
-      "Crowd-sourced electricity outage tracking for Nigeria — a six-level geographic hierarchy, map-based reporting, and outage clustering built for the Orange internship programme.",
+      "Crowd-sourced electricity outage tracking for Nigeria — a six-level geographic hierarchy, map-based reporting, and outage tracking — the backend of a team project for the Orange internship programme.",
     overview: [
-      "PowerWatch lets people report power outages where they live and see what is happening around them on a map. Reports cluster into outages; outages roll up into daily, weekly and monthly summaries by area.",
-      "It was built for the Orange internship programme 2026 as a Fastify and Prisma backend against MySQL, with a React and MapLibre frontend.",
+      "PowerWatch lets people report power outages where they live and see what is happening around them on a map. Reports open, join and close outages; outages roll up into daily, weekly and monthly summaries by area.",
+      "It was a team project for the Orange internship programme 2026. I built the backend — Fastify and Prisma against MySQL, 62 endpoints across eight route groups — and a teammate built the React and MapLibre frontend.",
       "The interesting part is the geography. \"Is the power out?\" is a question about a neighbourhood, but outages are caused at substation and feeder level, which does not map onto any address a person would type.",
     ],
     problem: [
@@ -420,23 +420,23 @@ export const work: CaseStudy[] = [
       },
       {
         title: "Reports, outages and the join between them",
-        body: "Report is what a person submitted. Outage is the inferred event. OutageReport joins them, so clustering can be re-run and corrected without destroying the original submissions — the raw reports stay the record of truth.",
+        body: "Report is what a person submitted. Outage is the event. OutageReport joins them. An OFF report opens an outage for its neighbourhood if none is open, or joins the open one and increments its report count; an ON report closes it and records the duration in minutes — all inside one database transaction.",
       },
       {
         title: "Pre-aggregated summaries",
-        body: "DailyReportSummary, WeeklyOutageSummary and MonthlyStatistic are materialised by scheduled jobs rather than computed per request. Analytics over a growing report table is the thing that would have made the map slow.",
+        body: "DailyReportSummary, WeeklyOutageSummary and MonthlyStatistic are materialised on demand through three admin endpoints rather than computed per request. Analytics over a growing report table is the thing that would have made the map slow.",
       },
       {
         title: "Layered Fastify backend",
-        body: "routes → controllers → services → repositories → models, with DTOs, validators, enums, errors and loaders as separate concerns, and Swagger generated from the route schemas. Twenty Prisma models over MySQL.",
+        body: "routes → controllers → services → repositories → models, with services split into commands and queries across eleven areas, DTOs, validators, enums, errors and loaders as separate concerns, and Swagger generated from the route schemas. Twenty Prisma models over MySQL.",
       },
       {
         title: "Auth and delivery",
-        body: "JWT with refresh tokens and device-bound sessions, OTP verification by email, and Firebase Admin for push notifications when an outage is confirmed in an area you follow. Rate limiting is modelled in the database, not only in memory, so limits survive a restart.",
+        body: "JWT with refresh tokens and device-bound sessions, OTP verification by email, rate limiting on the public routes, and Firebase Cloud Messaging for admin broadcasts and topic subscriptions, with every in-app notification stored in NotificationLog.",
       },
       {
-        title: "Map-first frontend",
-        body: "React with MapLibre and react-map-gl, Tailwind for layout, Mixpanel for product analytics. The map is the primary interface — the list view is secondary.",
+        title: "Frontend, built by a teammate",
+        body: "React 19 with MapLibre and react-map-gl for the heatmap and monitoring views, Tailwind for layout and Mixpanel for product analytics — built by a teammate against the backend's Swagger contract.",
       },
       {
         title: "Audit trail",
@@ -445,27 +445,23 @@ export const work: CaseStudy[] = [
     ],
     decisions: [
       {
-        title: "Model the hierarchy, do not geocode",
-        body: "Reverse-geocoding Nigerian addresses is unreliable and expensive per request. Seeding the administrative hierarchy and letting people pick their neighbourhood is less elegant and far more accurate.",
+        title: "Geocode, then fall back offline",
+        body: "GPS coordinates are resolved through OSM Nominatim's boundary data, falling back to a local LGA coordinate dataset when that fails, and mapped onto the seeded six-level hierarchy. A first version used LGA centre points, which put reports near a boundary in the wrong area.",
       },
       {
-        title: "Keep reports immutable, infer outages separately",
-        body: "Clustering heuristics will be wrong at first. Separating the submission from the inference means improving the algorithm is a re-run, not a data migration.",
+        title: "One open outage per neighbourhood",
+        body: "Whether a report opens, joins or closes an outage is decided in the same transaction that stores the report. Fifty people reporting one blackout produce one outage with fifty reports, never fifty outages racing each other.",
       },
       {
         title: "Materialise the summaries",
         body: "The map and dashboards read from pre-aggregated tables. Live aggregation over reports would have been simpler until the first thousand rows, and then permanently slower.",
-      },
-      {
-        title: "Persist the rate limits",
-        body: "A RateLimit model in MySQL rather than memory-only counters. An abuse-prone public form on a service that restarts should not forget who was flooding it.",
       },
     ],
     metrics: [
       { value: "20", label: "Prisma models" },
       { value: "6", label: "Geographic levels" },
       { value: "3", label: "Summary rollups" },
-      { value: "2", label: "Delivery channels" },
+      { value: "62", label: "API endpoints" },
     ],
     stack: [
       "TypeScript",
@@ -477,9 +473,10 @@ export const work: CaseStudy[] = [
       "Firebase Admin",
       "Mixpanel",
       "Swagger",
-      "Docker",
+      "Zod",
+      "Nodemailer",
     ],
-    links: [],
+    links: [{ label: "Source", href: "https://github.com/circorangeintern/Prism-circle" }],
     hue: 46,
     featured: true,
   },
@@ -570,66 +567,484 @@ export const work: CaseStudy[] = [
 
   /* ================================================================== */
   {
-    slug: "eko-xpedite",
-    name: "Eko Xpedite Exchange",
-    kind: "Exchange & settlement backend",
-    category: "Payments & fintech",
-    year: "2025 — present",
-    role: "Backend engineer, Newdich team",
-    status: "Private",
+    slug: "sentinelx",
+    name: "SentinelX",
+    kind: "Network intrusion detection & prevention",
+    category: "Security",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
     summary:
-      "Backend development in Node.js and TypeScript with the Newdich team — merchant, agent and end-user flows, and the service architecture that connects them.",
+      "A self-hosted intrusion detection and prevention platform in Python — 13 detectors, a bounded YAML rule language, explained 0–100 risk scores, and firewall enforcement that stays off until an administrator types a confirmation phrase.",
     overview: [
-      "Eko Xpedite Exchange is a Newdich Technology product. I work on the backend in Node.js and TypeScript as part of the team, rather than as the sole author — so this case study covers the shape of the work, not a walkthrough of a codebase I own.",
-      "The system serves three distinct parties. Merchants list and settle. Agents transact on behalf of customers who are not themselves on the platform. End users hold accounts directly. The same underlying value moves between all three.",
-      "Most of what makes it interesting is that those three roles want incompatible things from the same ledger.",
+      "SentinelX captures network traffic, live or from PCAP files, decodes it, and detects scans, brute force, floods, DNS abuse and custom rule matches. Every detection carries its evidence, the thresholds it crossed and a risk score broken down by factor. Related detections are correlated into incidents, and, only when enabled, the attacker is blocked or rate-limited through the host firewall.",
+      "It is built for people who look after one host or a small network: homelabs, small offices without a security team, training labs and analysts triaging captures. It is deliberately not a replacement for Suricata or Zeek on high-speed links, and the README says so.",
+      "I designed and built it alone. The backend is a Python modular monolith of 119 source files, with a Next.js dashboard, a Typer CLI and a Docker Compose stack beside it.",
     ],
     problem: [
-      "An agent-based exchange has a structural problem: the person operating the account is frequently not the person the money belongs to. Every permission check, every limit and every audit entry has to distinguish the actor from the beneficiary, and getting that wrong is both a fraud vector and a compliance failure.",
-      "Merchants, agents and users also have different tolerances for latency and failure. A merchant settlement can take minutes; an agent standing at a counter with a customer cannot.",
-      "And team-built backends have a second problem that solo projects do not: contracts between services have to be legible to people who did not write them.",
+      "Most small networks have no intrusion detection at all, because the serious tools assume a security team to tune them and read a raw alert feed. An alert that says only \"port scan\" gives a generalist nothing to act on, and a tool that blocks addresses on its own can lock its operator out of the machine it is protecting.",
+      "So the constraints were: every alert must explain itself, prevention must be off by default and hard to switch on by accident, and the tool must be honest about what the host it runs on can actually do, rather than failing silently when it lacks a privilege.",
     ],
     architecture: [
       {
-        title: "Three actor models, one value model",
-        body: "Merchant, agent and end-user are modelled as distinct entities with distinct capabilities, over a shared representation of accounts and movements. The actor is recorded separately from the account being acted on, so an agent transaction is attributable to both.",
+        title: "One pipeline for live, replay, benchmark and test",
+        body: "Capture → decoder → per-source feature extractor → detection engine → risk engine → correlation → response engine → safety guard → firewall. A single composition root wires it to storage, Redis and the event bus, and the API server, the CLI, the PCAP Lab and the benchmark harness all run the same assembly. A detection that fires on a replay went through the same code it would on the wire.",
       },
       {
-        title: "Service boundaries as contracts",
-        body: "The parts of the platform I work on expose typed API contracts rather than shared internals, because the team is the consumer. A boundary that is only a convention does not survive four people and six months.",
+        title: "Own decoder and capture backends",
+        body: "struct-based decoders for Ethernet, Linux cooked capture, raw IP and loopback framing; IPv4, IPv6, ARP, TCP, UDP and ICMP; and DNS, HTTP request metadata and TLS ClientHello (SNI, ALPN). Capture uses AF_PACKET on Linux and libpcap through Scapy elsewhere, and SentinelX reads pcap and pcapng itself. Malformed packets are counted, never fatal.",
       },
       {
-        title: "Node.js and TypeScript",
-        body: "Strict TypeScript across the service surface, with the type definitions doing the work that a design document would otherwise have to — request and response shapes, error unions, and the state a transaction can legally be in.",
+        title: "Detectors, rules and baselines",
+        body: "Eleven behavioural detectors — vertical and horizontal port scans, UDP scans, brute force, SYN, connection-rate, ICMP and HTTP floods, DNS anomalies, denylisted sources and TCP flag anomalies — plus a statistical baseline detector and an optional Isolation Forest model. Custom rules are YAML, parsed by a bounded recursive-descent parser rather than evaluated as code, and each rule carries its own embedded tests.",
       },
       {
-        title: "Flows over endpoints",
-        body: "Work is organised around complete flows — onboard a merchant, fund an agent float, settle a batch — rather than around CRUD on entities. It is the difference between a system somebody can operate and a set of endpoints that happen to exist.",
+        title: "Explained risk and correlated incidents",
+        body: "Each detection's score adds weighted contributions from severity, confidence, frequency, source history, correlation, threat intelligence and previous responses, capped to 0–100, with every contribution stored and shown. Seven kill-chain patterns — reconnaissance followed by a credential attack, reconnaissance with service disruption, possible exfiltration and others — group detections from one source into incidents.",
+      },
+      {
+        title: "Guarded response",
+        body: "Detect-only, manual-approval and automatic modes, with dry run on top. Firewall adapters exist for nftables, iptables, pf and Windows Firewall. A safety guard refuses to block loopback, allowlisted, management and host addresses, operators who signed in recently, and any prefix that contains a protected address.",
+      },
+      {
+        title: "Platform around the core",
+        body: "A FastAPI REST API of 65 HTTP routes plus a WebSocket event stream, SQLAlchemy over PostgreSQL (SQLite for evaluation) with Alembic migrations across 12 tables, Redis for shared state, Prometheus metrics, and a Next.js 16 dashboard. A Docker Compose stack runs postgres, redis, migrate, api, dashboard and an nginx proxy, with an optional host-network sensor profile.",
       },
     ],
     decisions: [
       {
-        title: "Record the actor, always",
-        body: "Every movement carries who initiated it as well as whose account it touched. It costs a column and it is the difference between an audit trail and a list of numbers.",
+        title: "Off by default, and loud about it",
+        body: "A new installation runs detect-only, dry run on, with a null firewall backend. Turning prevention on at runtime requires typing ENABLE PREVENTION, and the change is audited. A missing or unusable firewall refuses every change rather than reporting it as done. The failure I most wanted to rule out was a security tool quietly doing something to traffic that nobody asked for.",
       },
       {
-        title: "Types as the team's documentation",
-        body: "On a shared codebase, a strict type surface is read far more often than a wiki. Making illegal states unrepresentable is also the cheapest code review anyone gets.",
+        title: "Probe the host instead of assuming it",
+        body: "Capture and firewall support are decided by actually opening a raw socket, checking capability bits and running each firewall tool's read-only listing command. Each result comes with a reason and a remedy. A permission error or an invalid BPF filter is reported as it is, never hidden by quietly falling back to another backend.",
       },
       {
-        title: "No numbers in this case study",
-        body: "It is a private, team-owned codebase and I am not its sole author. Counting things I did not build, or publishing internals that are not mine to publish, would make this page less trustworthy rather than more.",
+        title: "An additive score over a learned one",
+        body: "Every point of a risk score traces to a named, re-weightable factor. It cannot model interactions between factors the way a learned model could, but an operator can see why a host scored 91, and that is what the tool is for.",
+      },
+      {
+        title: "Test it against real attacks, not just fixtures",
+        body: "A demo script attacks the Docker stack from four containers with nmap, hping3, DNS tunnelling queries and an HTTP flood. Earlier runs found real defects — targets blamed for their own replies, a SYN flood on an open port missed, SentinelX's own database traffic looking like brute force — and each fix has a regression test. On the final run the kernel's nftables counter recorded 3,084 dropped packets from the blocked attacker.",
       },
     ],
     metrics: [
-      { value: "3", label: "Actor types" },
-      { value: "TS", label: "Strict, end to end" },
-      { value: "Team", label: "Shared codebase" },
-      { value: "2025", label: "Ongoing since" },
+      { value: "13", label: "Detectors" },
+      { value: "1,876", label: "Tests collected" },
+      { value: "4", label: "Firewall adapters" },
+      { value: "14", label: "Synthetic attack scenarios" },
     ],
-    stack: ["Node.js", "TypeScript", "REST APIs", "PostgreSQL", "Authentication", "Docker", "Linux"],
-    links: [],
-    hue: 190,
+    stack: [
+      "Python 3.12+",
+      "FastAPI",
+      "Pydantic",
+      "SQLAlchemy + Alembic",
+      "PostgreSQL",
+      "SQLite",
+      "Redis",
+      "Scapy",
+      "Typer",
+      "Prometheus",
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind CSS",
+      "Docker",
+      "nginx",
+      "nftables",
+    ],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/Sentinelx" }],
+    hue: 330,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "scriptune",
+    name: "Scriptune",
+    kind: "Hymn and scripture recognition",
+    category: "AI & agents",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "Hear a hymn or a Bible verse and find out what it is: one TypeScript API behind a website, an iPhone app and an Android app, with Whisper speech recognition on a self-hosted server and on the phone itself.",
+    overview: [
+      "Scriptune listens to a hymn the choir has started or a verse the preacher has quoted, works out what it was, and opens the words: the full hymn with its number in the hymnal, or the verse in its chapter, with the passages and hymns connected to it.",
+      "I built it on my own and released it under the MIT licence. It is a Zudojs modular-monolith API over PostgreSQL, a Next.js website that installs as a PWA, an Expo app for iOS and Android, and a Python service that runs OpenAI Whisper. Both clients import one shared, typed contracts package.",
+      "The hard part is not the speech recognition. It is turning a noisy, half-heard transcript into the right verse among seven Bible translations, or the right hymn among 1,200, without asking the database for expensive fuzzy work it does not need.",
+    ],
+    problem: [
+      "Churchgoers catch scripture and hymns in fragments. A verse is quoted mid-sermon without a reference; a hymn starts and the number is not on the board. Searching the web for a half-remembered line works badly when the line was sung, a word was misheard, or it was in Yoruba.",
+      "I did not want church audio going to a commercial speech API by default. Transcription had to run on hardware the operator controls, and a recording had to be discarded once it had been turned into words.",
+      "It also has to work in a pew, sometimes with no signal at all. That means the texts, the search and, ideally, the listening model have to live on the phone.",
+    ],
+    architecture: [
+      {
+        title: "One API, nine modules",
+        body: "The API is a Zudojs modular monolith with nine modules: http, database, bible, hymns, search, transcription, recognition, identity and library. Each registers its own providers, command and query handlers and routes, and dependencies point strictly downward. It serves 51 routes, documented as OpenAPI at /docs, over 29 Prisma models.",
+      },
+      {
+        title: "Three-stage search",
+        body: "Verses and hymns are searched in the same three stages. First, every word present, as one GIN lookup against a generated tsvector. If that finds nothing, any pair of the stronger words, which is still an index lookup. If that also finds nothing and the phrase is at least 12 characters, pg_trgm word similarity, which rechecks thousands of rows. Candidates are then scored for confidence and the top five returned.",
+      },
+      {
+        title: "Whisper behind an interface",
+        body: "Speech-to-text sits behind a TranscriptionProvider interface with three implementations: the Whisper service, a fake for tests, and an unavailable provider that switches audio off deliberately. The Python service is FastAPI over openai-whisper. It runs one transcription at a time behind a semaphore, answers 503 with Retry-After when busy instead of queueing without limit, and checks each model download against its SHA-256 before loading it.",
+      },
+      {
+        title: "Hymns and scripture linked by their words",
+        body: "An import-time job finds where a hymn quotes the King James Version by looking for runs of four shared words, scored by how rare those words are in the Bible and discarded if the run appears in more than twelve verses. So \"the print of the nails\" counts and \"O Lord our God\" does not. A second job pairs each hymn with the hymns most like it, by rarity-weighted wording plus shared scripture.",
+      },
+      {
+        title: "Offline on the phone",
+        body: "The API exports a whole translation or hymnal as one response that clients may cache for a day. The Expo app stores it in SQLite with FTS5 tables, so reading, search and typed identification work with no connection. whisper.rn adds on-device transcription with a model downloaded on request rather than bundled, so native builds can listen offline too.",
+      },
+      {
+        title: "Shared contracts",
+        body: "@scriptune/contracts holds the DTO types, library keys, legal text and fetch client that both the Next.js site and the Expo app import. A change to a response shape fails both clients' typecheck in CI rather than one of them at runtime.",
+      },
+      {
+        title: "CI and native builds",
+        body: "GitHub Actions runs the API typecheck and tests against a PostgreSQL 17 service, the contracts typecheck, the web lint, typecheck and production build, and the mobile typecheck, lint and Android bundle. A second workflow builds the Android APK and the iOS app on GitHub's runners, on demand or from a mobile-v* tag.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Cheap stages first",
+        body: "Each more expensive search stage runs only when the one before it found nothing. Trigram similarity is the stage that forgives a misheard word, and it is also the slow one, so it is the last resort rather than the default.",
+      },
+      {
+        title: "Fold accents in the index, not the app",
+        body: "Yoruba tone marks meant a query transcribed as \"Olorun\" never matched a verse stored as \"Ọlọ́run\", and fell through to the slow fuzzy stage. A Postgres function strips combining marks after NFKD normalisation, and both the stored search vectors and the incoming query pass through it, so Yoruba stays on the fast index path.",
+      },
+      {
+        title: "Self-hosted speech, no stored audio",
+        body: "Whisper runs on the operator's server or on the phone; no third-party speech service is involved. A recognition attempt records the transcript, candidates, timings and the audio's type and size, never the audio itself. If the transcriber is down, only the microphone flow fails; typed identification never touches it.",
+      },
+      {
+        title: "Work out the connections ahead of time",
+        body: "Scripture links and related hymns are computed by batch jobs and stored as rows. Comparing a hymnal's words against the whole Bible is batch work; serving the answer should be a few indexed reads.",
+      },
+    ],
+    metrics: [
+      { value: "51", label: "API routes" },
+      { value: "29", label: "Prisma models" },
+      { value: "7", label: "Bible translations" },
+      { value: "3", label: "Search stages" },
+    ],
+    stack: [
+      "TypeScript",
+      "Zudojs",
+      "Prisma 7",
+      "PostgreSQL 17",
+      "Redis 7",
+      "Python",
+      "FastAPI",
+      "OpenAI Whisper",
+      "Next.js 16",
+      "React 19",
+      "Tailwind 4",
+      "Expo 57",
+      "React Native",
+      "SQLite",
+      "whisper.rn",
+      "Docker",
+      "GitHub Actions",
+    ],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/scriptune" }],
+    hue: 256,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "commitguard",
+    name: "CommitGuard",
+    kind: "Git commit provenance and policy engine",
+    category: "Developer tooling",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "A policy engine that blocks AI-agent attribution in Git commit metadata — in local hooks, a GitHub Action and a webhook-driven GitHub App — measured against 9,174 labelled cases with every failing run kept.",
+    overview: [
+      "CommitGuard reads what a commit says about its own origin — author, committer, message and trailers — and decides, according to a repository's policy, whether that commit is acceptable. The first policy is AI-agent attribution: a commit carrying an AI agent as co-author is blocked by default; one crediting a human co-author is not.",
+      "I built it alone over six days in September 2026 — 132 commits — and published it to PyPI as commitguardian and to the GitHub Marketplace as a composite Action. It is pre-alpha. The same engine runs in three places: Git hooks on a developer's machine, a GitHub Actions check, and a GitHub App with a web dashboard for organisation-wide policy.",
+      "The interesting part is that commit messages are attacker-controlled text. A check that matches strings is easy to evade with casing, look-alike letters or characters that render as nothing, so most of the work went into parsing hostile input and into measuring, in public, how often the parser got it wrong.",
+    ],
+    problem: [
+      "AI coding agents increasingly write commits, and many record themselves in commit metadata. Some projects need to control that for contributor-agreement or licensing reasons, or simply to keep an accurate provenance record. Checking by hand does not scale.",
+      "Naive string matching fails in both directions. It is easy to evade — a Cyrillic letter in an agent's name, a variation selector inside the trailer key, a symbol before \"Co-authored-by\" that hides the line from a parser but not from a reader. It is also prone to false positives: a human who shares an agent's name, or an employee of the vendor, is not an AI agent.",
+      "And a local check is only advice. Anyone can pass --no-verify. A real boundary has to run server-side, and it has to be impossible for the pull request being judged to change the rules judging it.",
+    ],
+    architecture: [
+      {
+        title: "Detection separate from policy",
+        body: "Four detectors — coauthor, identity, trailer and bot — report findings with rule, severity, confidence and evidence, and know nothing about configuration. A separate policy evaluator turns findings into allow, warn or block, with block > warn > allow regardless of detector order. Neither side has side effects, which is what lets detection accuracy be measured independently of any policy choice.",
+      },
+      {
+        title: "Rules as data",
+        body: "Four YAML files hold the rules: 15 AI agents, 11 vendor domains and 6 bots, plus trailer patterns. They ship inside the installed package and are never read from the repository being scanned. Matching is exact after normalisation — case, width and whitespace folded, every default-ignorable code point removed, Cyrillic and Greek look-alikes mapped to Latin. There is no substring matching, and a vendor domain on its own is never enough.",
+      },
+      {
+        title: "A trailer parser with no regular expressions",
+        body: "The trailer parser is an explicit linear scan with bounded key length, trailer count and prefix skipping. It never raises; instead it records named flags such as MISSING_SEPARATOR and LEADING_CHARACTERS that detectors can act on. Work stays linear in message size, and each bypass fix was a readable change to the scan rather than a new branch in an expression.",
+      },
+      {
+        title: "Three enforcement layers",
+        body: "Local hooks — pre-commit, commit-msg and pre-push — give immediate feedback and chain any existing hooks rather than replacing them. The composite Action scans every commit a pull request introduces, plus merge-queue entries and pushes, with SHA-pinned actions, hash-pinned dependencies and only contents: read. The GitHub App does the same from signed webhooks and publishes a Check Run. All three reach the same analyser.",
+      },
+      {
+        title: "GitHub App on the standard library",
+        body: "The App service is a WSGI server from Python's standard library over SQLite — 47 tables — with cryptography as its only extra dependency, for signing the App JWT. Webhooks are signature-checked and deduplicated by delivery ID. Installation tokens are scoped down to one repository per scan, and repositories are fetched as metadata-only mirrors, so repository code is never checked out or run.",
+      },
+      {
+        title: "Dashboard and control plane",
+        body: "React 19 and TypeScript over a /api/v1 served by the same process: 32 pages covering scans, violations, versioned organisation policy with audited rollback, scoped expiring exceptions, staged rollouts and policy simulation against recorded scans. Four roles — viewer, security manager, admin and owner — are granted in CommitGuard, and users see only repositories GitHub already lets them see.",
+      },
+      {
+        title: "Reproducible evidence",
+        body: "Four versioned datasets of labelled commits, the largest with 9,174 cases, are rebuilt and fingerprinted by one command, commitguard reproduce. Every benchmark result is written once to a timestamped file and never overwritten.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Read policy from the base commit",
+        body: "If the check reads .commitguard.yaml from the pull request it is checking, the first commit of any pull request can be \"disable the check\". Server-side runs read policy from the base commit, and the workflow installs CommitGuard itself from that trusted commit. A pull request that tightens policy does not take effect until merged — that is the cost, and I accept it.",
+      },
+      {
+        title: "Every failure path blocks",
+        body: "A detector that raises, a finding with no matching policy, invalid configuration, a Git error — each becomes a block or an error, never an allow. The App publishes error, never success, and the dashboard shows UNKNOWN or STALE rather than a green tick. The only way to pass is a completed evaluation that found nothing.",
+      },
+      {
+        title: "Keep the failing runs",
+        body: "15 detection runs are committed, and four of them failed: one false negative, then two false positives introduced by the fix, then 11 and 15 misses found by property-based fuzzing. Each failing run was recorded before the fix. The final zero is only worth something because the runs that were not zero are sitting next to it.",
+      },
+      {
+        title: "Publish as commitguardian",
+        body: "commitguard and commitguard-cli on PyPI already belong to two unrelated projects. At one point the documentation told people to pip install commitguard, which would have installed someone else's code — a dependency-confusion problem of my own making. The distribution is commitguardian; the command is still commitguard.",
+      },
+    ],
+    metrics: [
+      { value: "9,174", label: "Labelled cases, none misjudged" },
+      { value: "4 of 15", label: "Benchmark runs that failed, kept" },
+      { value: "1,452", label: "Python tests" },
+      { value: "15", label: "AI agents in rule data" },
+    ],
+    stack: [
+      "Python 3.12",
+      "Typer",
+      "Pydantic",
+      "PyYAML",
+      "SQLite",
+      "GitHub Apps",
+      "GitHub Actions",
+      "React 19",
+      "TypeScript",
+      "Vite",
+      "TanStack Query",
+      "pytest",
+      "Hypothesis",
+      "Playwright",
+    ],
+    links: [
+      { label: "Source", href: "https://github.com/oyinlola-tech/commitguard" },
+      { label: "PyPI", href: "https://pypi.org/project/commitguardian/" },
+      {
+        label: "Marketplace",
+        href: "https://github.com/marketplace/actions/commitguard-ai-attribution-check",
+      },
+    ],
+    hue: 180,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "betng",
+    name: "BetNG",
+    kind: "Virtual football platform",
+    category: "Payments & fintech",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "A virtual football platform where every match is simulated once and seen identically on five clients: twelve TypeScript and Python services, integer-kobo money, and fourteen invariants each tied to a named test.",
+    overview: [
+      "BetNG runs four simulated football leagues of 80 clubs, round after round on a real clock. The platform simulates every match once, and every viewer sees that same match: the same fixture, prices, timeline, result and settlement. That holds on the web, on a phone, on a shop television, at a cashier terminal and in the admin console. It uses play money only.",
+      "I built it alone as a portfolio system. The gateway and seven TypeScript services run on Zudojs with Prisma. Four Python services handle simulation, odds, risk and analytics. Five clients share one set of wire contracts and one view-model layer.",
+      "The hard part was trust, not features. When the house prices the bets and also plays the match, the only credible design is one where nobody can influence, predict or edit the result. The database has to enforce that and tests have to prove it. A README promise is not enough.",
+    ],
+    problem: [
+      "A virtual sports product is a chain of authorities. A scheduler creates fixtures, an odds engine prices them, a risk engine decides how much it will accept, betting closes, a simulation plays the match and settlement pays out. Each link must be the only one allowed to make its decision, and none may see further along the chain than it needs to.",
+      "The obvious failure is a result that bets can reach. The product is rigged, whether anyone means it or not, if any of three things is true: the simulation can see stakes, an admin can re-run a match, or the seed can be computed from public inputs.",
+      "The quieter failure is five clients drifting apart. A phone that works out its own payout, or a TV that runs its own clock, will eventually show a number the platform never agreed to. So the clients had to display state and never produce it.",
+    ],
+    architecture: [
+      {
+        title: "Twelve services, one schema each",
+        body: "There is a public gateway, seven TypeScript services (match, betting, wallet, settlement, identity, event, email) and four Python services (simulation, odds, risk, analytics). Each service that stores data owns one PostgreSQL schema and has a login that can write only that schema. A write to another service's data goes through that service's `POST /rpc` and needs an internal token. Redis holds locks, caches and rate-limit counters, and is never the source of truth.",
+      },
+      {
+        title: "The gateway as a route table",
+        body: "The public API is 187 routes declared as data: the path, the service that owns it and who may call it. The gateway checks the session, removes any incoming `x-betng-*` header and rebuilds the actor from the session, so a service never trusts a user id taken from a path or body. Rate limits on bets, deposits and withdrawals fail closed. No route sets a score or a winner.",
+      },
+      {
+        title: "A fifteen-state match lifecycle",
+        body: "A match moves from FIXTURE_CREATED through BETTING_CLOSED, SIMULATION_STARTED and MATCH_FINISHED to SETTLEMENT_COMPLETED. There are also failure states and VOIDED. Every transition is stored as a row. The scheduler ticks once a second behind a Redis lock, so only one instance ever drives it. With the default settings a match minute lasts two seconds.",
+      },
+      {
+        title: "A simulation that cannot be steered",
+        body: "Betting closes before kick-off. The simulation then plays the match once, minute by minute, from the match id and the two teams' strengths. Its request models reject every other field, so sending a stake is a validation error. The seed is an HMAC of the match under a server secret, so nobody can work out the result from the source code. Database triggers block UPDATE, DELETE and TRUNCATE on results and events. Events are shown only when the match clock reaches them.",
+      },
+      {
+        title: "Pricing and risk",
+        body: "The odds service prices six market types from the score distribution the simulation produces. Pricing uses the same minute-by-minute core that decides the score. The risk service answers ACCEPT, LIMIT or REJECT for every stake, based on exposure across all accounts. It freezes that exposure when betting closes and has no way to touch a price or a result.",
+      },
+      {
+        title: "Money as integer kobo",
+        body: "Every amount is a BIGINT in kobo, from the database all the way to the screen. Payouts are calculated with integer arithmetic only, using the odds stored on the bet when it was accepted. The wallet ledger is append-only. The operator ledger is kept apart from customer wallets. A unique key makes settlement idempotent, so settling a match twice pays nobody twice.",
+      },
+      {
+        title: "Five clients, one match model",
+        body: "The web, TV, shop and admin apps are React 19 on Vite and share one component library. The mobile app is Expo 54 and uses the same view models. Components never call fetch or import the SDK. They render view models from a data-source interface, and a platform adapter behind it talks to the gateway. Realtime signals over WebSocket or SSE tell TanStack Query which cached data to refresh.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Enforce invariants in the database, prove them in tests",
+        body: "`docs/invariants.md` lists fourteen rules, such as one result per match, bets never reach the simulation, settlement pays on stored odds, and admin cannot pick a winner. Beside each rule it names what enforces it and the test that proves it. Where a rule could be a unique index, a CHECK or a trigger, I made it one, because application code can be bypassed and a constraint cannot.",
+      },
+      {
+        title: "Close betting before the match is played",
+        body: "The simulation runs at kick-off, after betting has closed and exposure is frozen. No bet can be accepted once the result exists, so there is nothing for a bet to influence. The result is created at kick-off and only revealed as the match plays out.",
+      },
+      {
+        title: "TypeScript for the plumbing, Python for the maths",
+        body: "The gateway, ledgers, identity and match lifecycle are TypeScript on Zudojs and Prisma. The probability model, pricing, risk and analytics are Python with FastAPI and psycopg. Both sides use the same camelCase wire format: Zod schemas in `packages/contracts`, with matching Pydantic models on the Python side. So changing language never means changing the contract.",
+      },
+      {
+        title: "No stand-in backend for the clients",
+        body: "There is no offline mock. Development, the browser test suites and production all run against the real platform. `pnpm verify` fails if a production bundle references a mock, a data-source switch or a demo credential. The clients take longer to start, but they cannot drift from the API.",
+      },
+    ],
+    metrics: [
+      { value: "12", label: "Backend services" },
+      { value: "5", label: "Clients, one match model" },
+      { value: "187", label: "Gateway routes" },
+      { value: "14", label: "Invariants, each with a test" },
+    ],
+    stack: [
+      "TypeScript",
+      "Node.js 24",
+      "Zudojs",
+      "Prisma 7",
+      "Python 3.14",
+      "FastAPI",
+      "PostgreSQL 17",
+      "Redis 8",
+      "React 19",
+      "Vite",
+      "Expo",
+      "Tailwind CSS",
+      "TanStack Query",
+      "Zod",
+      "Playwright",
+      "Docker",
+    ],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/BetNg" }],
+    hue: 80,
+    featured: false,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "church-cms",
+    name: "Church Management System",
+    kind: "Church records & public website",
+    category: "Civic & infrastructure",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "A records system and public website for a church in Okitipupa, Ondo State — members, households, attendance, finance and content behind four roles and 23 permissions, on Express and MySQL.",
+    overview: [
+      "The system gives a local church in Okitipupa, Ondo State, a public website and an admin dashboard over one database. The public side carries announcements, programmes, a gallery, a giving page and a contact form; the admin side holds members, households, attendance, income and expenses, and the content the public side shows.",
+      "I built it alone: an Express 5 API over MySQL with 70 endpoints under /api/v1, and 28 static HTML pages styled with Tailwind and driven by shared scripts. There is no frontend build step.",
+      "Most of the work went into who may do what. Member details and giving records are personal data, while announcements and the gallery are edited by whoever runs the church's media — so every admin endpoint asks for a named permission, and sessions can be revoked the moment someone's access changes.",
+    ],
+    problem: [
+      "A church's records are small but sensitive. Contact details, household links, attendance and who gave what are personal; announcements and the weekly schedule are public. Both live in the same office and, here, in the same database.",
+      "The people using the dashboard have different jobs. Someone who posts the weekly announcement should not be able to export the finance ledger, and nobody should be able to promote themselves or delete the last administrator.",
+      "It also has to be simple to run: one Node process and a MySQL database, set up on first start without a migration tool or a frontend build.",
+    ],
+    architecture: [
+      {
+        title: "One Express app, two surfaces",
+        body: "createApp builds the application from an injected database, rate limiters, mail and upload services. It serves 28 HTML pages — 14 public, five of them error states, and 14 admin, four of them auth pages — and 70 JSON endpoints across seven routers under /api/v1, with the same router also mounted at /api for older clients.",
+      },
+      {
+        title: "Sixteen tables, created on first run",
+        body: "db-init.js creates the database and 16 tables — users, password_resets, church_info, members, family_members, attendance, transactions, expense_categories, programs, weekly_schedule, announcements, gallery, contact_messages, contact_replies, external_links and activity_log — then seeds church details, the weekly schedule and a super_admin from the environment. Columns added after the first release are checked against information_schema before being applied, so the script is safe to re-run.",
+      },
+      {
+        title: "Permission-gated routes",
+        body: "Four roles in a hierarchy — super_admin, admin, editor, viewer — map to 23 permissions such as members:write and finance:export. All 53 admin endpoints call requirePermission; the role is read from the database once per request and cached, never taken from the client. A user cannot create, promote or delete an account at or above their own role, and the last active administrator cannot be deleted.",
+      },
+      {
+        title: "Revocable sessions",
+        body: "JWTs carry a purpose claim and a token version. Logging out, changing or resetting a password, or deactivating an account increments token_version, which invalidates every token issued before it, and a password-reset token cannot be used as a session. Password reset is a six-digit OTP by email, valid for ten minutes and usable once.",
+      },
+      {
+        title: "Audit trail and rate limits",
+        body: "Middleware wraps res.json on every write request and records each successful one in activity_log with the user, action, entity, IP address and request ID. Seventeen named rate-limit tiers run from 300 requests a minute across the API down to five password-reset attempts per ten minutes, keyed by email.",
+      },
+      {
+        title: "Uploads and scheduled publishing",
+        body: "Multer accepts images, then each file is re-checked against PNG, JPEG and WebP signatures once it is on disk, and anything that only claims to be an image is deleted. An interval scheduler publishes announcements whose scheduled time has passed, and stops cleanly on SIGTERM or SIGINT.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Permissions, not role checks",
+        body: "Routes ask for members:write, not for admin. Changing what an editor may do is one edit to the permission table rather than a search through seven routers.",
+      },
+      {
+        title: "Static pages, no build step",
+        body: "The admin is forms and tables. Plain HTML with shared scripts runs anywhere Node runs, with nothing to compile. The cost is that Tailwind loads from a CDN, which the Content Security Policy names explicitly.",
+      },
+      {
+        title: "No inline scripts, so the CSP can forbid them",
+        body: "Pages declare a data-page attribute and js/page-init.js dispatches their behaviour, so script-src does not need 'unsafe-inline'. Announcement bodies are stored as plain text and rendered through text nodes, so stored markup cannot execute.",
+      },
+      {
+        title: "Test the real stack against a double",
+        body: "The API tests boot the real router stack from createApp against a database double, covering auth, RBAC and the public API. The frontend tests load each page with linkedom, run its real scripts, and check that selectors resolve and form payloads match the API contract. Forty tests, all passing.",
+      },
+    ],
+    metrics: [
+      { value: "16", label: "MySQL tables" },
+      { value: "70", label: "API endpoints" },
+      { value: "23", label: "RBAC permissions" },
+      { value: "40", label: "Automated tests" },
+    ],
+    stack: [
+      "Node.js",
+      "Express 5",
+      "MySQL",
+      "mysql2",
+      "JWT",
+      "bcrypt",
+      "Multer",
+      "Nodemailer",
+      "Tailwind CSS",
+      "node:test",
+      "linkedom",
+    ],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/cms" }],
+    hue: 4,
     featured: false,
   },
 

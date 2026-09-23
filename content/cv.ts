@@ -42,6 +42,43 @@ export const skills: SkillGroup[] = [
   { label: "Frontend", items: "React · Next.js · Tailwind CSS · Three.js · Vanilla HTML/CSS/JS" },
 ];
 
+export type SoftSkill = { label: string; detail: string };
+
+/**
+ * Soft skills, each tied to something that happened rather than asserted.
+ * An ATS matches the label; a recruiter reads the detail.
+ */
+export const softSkills: SoftSkill[] = [
+  {
+    label: "Ownership & leadership",
+    detail: "Founded ZudoMart and lead its engineering end to end; lead engineer on Telente CBT and LearnBridge.",
+  },
+  {
+    label: "Written communication",
+    detail: "Design specifications, READMEs, API documentation and architecture write-ups that another engineer can build from.",
+  },
+  {
+    label: "Team collaboration",
+    detail: "Ship on shared codebases with the Newdich team and an Orange internship team, through typed contracts and code review.",
+  },
+  {
+    label: "Problem solving & systems thinking",
+    detail: "Break an ambiguous product idea into services, data models, workflows and failure cases before writing code.",
+  },
+  {
+    label: "Client & stakeholder communication",
+    detail: "Delivered software for schools, a church, a food business and savings groups, translating their needs into scope.",
+  },
+  {
+    label: "Self-directed learning",
+    detail: "Study for a CS degree alongside production work; taught myself Go, Python data tooling and security practice.",
+  },
+  {
+    label: "Remote work & time management",
+    detail: "Work asynchronously across time zones from WAT (UTC+1), with milestone-driven delivery on multiple concurrent projects.",
+  },
+];
+
 export type CvRole = {
   title: string;
   org: string;
@@ -75,11 +112,11 @@ export const roles: CvRole[] = [
     org: "Newdich Technology",
     period: "2025 — present",
     blurb:
-      "Backend development on Eko Xpedite Exchange with the Newdich team — merchant, agent and end-user flows, and the service architecture connecting them.",
+      "Backend engineering in Node.js and TypeScript as part of the Newdich Technology team, a software, IoT and cybersecurity company operating out of Abuja and Okitipupa.",
     points: [
-      "Built backend services in Node.js and TypeScript across three distinct actor models — merchant, agent and end user — over one shared representation of accounts and movements.",
-      "Recorded the acting party separately from the account acted on, so agent-initiated transactions are attributable to both and the audit trail survives a dispute.",
-      "Defined typed API contracts between services rather than shared internals, because the consumer is a team rather than a single author.",
+      "Build backend services in Node.js and TypeScript on a shared, team-owned codebase — service design, data modelling and API implementation.",
+      "Define typed API contracts between services rather than shared internals, so a boundary stays legible to engineers who did not write it.",
+      "Designed and built the Newdich Technology company website, governed by a written design specification the code must follow.",
     ],
     tech: "Node.js · TypeScript · REST APIs · PostgreSQL · Docker · Linux",
   },
