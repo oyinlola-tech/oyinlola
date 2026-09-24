@@ -47,7 +47,7 @@ async function check(url, attempt = 1) {
       method,
       redirect: "follow",
       signal: AbortSignal.timeout(20_000),
-      headers: { "user-agent": "oyinlola.site link check (+https://oyinlola.site)" },
+      headers: { "user-agent": "portfolio.oyinlola.site link check (+https://portfolio.oyinlola.site)" },
     });
     // Some hosts refuse HEAD outright; fall back once before believing it.
     if (res.status === 405 && method === "HEAD") {

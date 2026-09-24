@@ -17,7 +17,7 @@ export const site = {
   timezone: "WAT · UTC+1",
   email: "oluwayemioyinlola2@gmail.com",
   phone: "+234 913 351 9489",
-  url: "https://oyinlola.site",
+  url: "https://portfolio.oyinlola.site",
   available: true,
   availableFor: "Backend, platform and software engineering roles",
 } as const;
@@ -34,7 +34,7 @@ export const links = {
   github: "https://github.com/oyinlola-tech",
   linkedin: "https://linkedin.com/in/oluwayemioyinlola",
   twitter: "https://twitter.com/oyinlola141",
-  site: "https://oyinlola.site",
+  site: "https://portfolio.oyinlola.site",
   cv: "/cv",
 } as const;
 

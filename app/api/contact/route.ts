@@ -90,7 +90,7 @@ export async function POST(request: Request) {
   const escape = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const heading = subject || "New message from oyinlola.site";
+  const heading = subject || "New message from portfolio.oyinlola.site";
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -100,12 +100,12 @@ export async function POST(request: Request) {
         from,
         to: [to],
         reply_to: email,
-        subject: `[oyinlola.site] ${heading}`,
+        subject: `[portfolio.oyinlola.site] ${heading}`,
         text: `From: ${name} <${email}>\nSubject: ${heading}\n\n${message}\n\n— sent from the contact form`,
         html: `
           <div style="font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.6;color:#111">
             <p style="margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#888">
-              oyinlola.site — contact form
+              portfolio.oyinlola.site — contact form
             </p>
             <h2 style="margin:0 0 16px;font-size:18px">${escape(heading)}</h2>
             <p style="margin:0 0 16px;font-size:14px;color:#555">
