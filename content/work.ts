@@ -232,6 +232,300 @@ export const work: CaseStudy[] = [
 
   /* ================================================================== */
   {
+    slug: "betng",
+    name: "BetNG",
+    kind: "Virtual football platform",
+    category: "Payments & fintech",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "A virtual football platform where every match is simulated once and seen identically on five clients: twelve TypeScript and Python services, integer-kobo money, and fourteen invariants each tied to a named test.",
+    overview: [
+      "BetNG runs four simulated football leagues of 80 clubs, round after round on a real clock. The platform simulates every match once, and every viewer sees that same match: the same fixture, prices, timeline, result and settlement. That holds on the web, on a phone, on a shop television, at a cashier terminal and in the admin console. It uses play money only.",
+      "I built it alone as a portfolio system. The gateway and seven TypeScript services run on Zudojs with Prisma. Four Python services handle simulation, odds, risk and analytics. Five clients share one set of wire contracts and one view-model layer.",
+      "The hard part was trust, not features. When the house prices the bets and also plays the match, the only credible design is one where nobody can influence, predict or edit the result. The database has to enforce that and tests have to prove it. A README promise is not enough.",
+    ],
+    problem: [
+      "A virtual sports product is a chain of authorities. A scheduler creates fixtures, an odds engine prices them, a risk engine decides how much it will accept, betting closes, a simulation plays the match and settlement pays out. Each link must be the only one allowed to make its decision, and none may see further along the chain than it needs to.",
+      "The obvious failure is a result that bets can reach. The product is rigged, whether anyone means it or not, if any of three things is true: the simulation can see stakes, an admin can re-run a match, or the seed can be computed from public inputs.",
+      "The quieter failure is five clients drifting apart. A phone that works out its own payout, or a TV that runs its own clock, will eventually show a number the platform never agreed to. So the clients had to display state and never produce it.",
+    ],
+    architecture: [
+      {
+        title: "Twelve services, one schema each",
+        body: "There is a public gateway, seven TypeScript services (match, betting, wallet, settlement, identity, event, email) and four Python services (simulation, odds, risk, analytics). Each service that stores data owns one PostgreSQL schema and has a login that can write only that schema. A write to another service's data goes through that service's `POST /rpc` and needs an internal token. Redis holds locks, caches and rate-limit counters, and is never the source of truth.",
+      },
+      {
+        title: "The gateway as a route table",
+        body: "The public API is 187 routes declared as data: the path, the service that owns it and who may call it. The gateway checks the session, removes any incoming `x-betng-*` header and rebuilds the actor from the session, so a service never trusts a user id taken from a path or body. Rate limits on bets, deposits and withdrawals fail closed. No route sets a score or a winner.",
+      },
+      {
+        title: "A fifteen-state match lifecycle",
+        body: "A match moves from FIXTURE_CREATED through BETTING_CLOSED, SIMULATION_STARTED and MATCH_FINISHED to SETTLEMENT_COMPLETED. There are also failure states and VOIDED. Every transition is stored as a row. The scheduler ticks once a second behind a Redis lock, so only one instance ever drives it. With the default settings a match minute lasts two seconds.",
+      },
+      {
+        title: "A simulation that cannot be steered",
+        body: "Betting closes before kick-off. The simulation then plays the match once, minute by minute, from the match id and the two teams' strengths. Its request models reject every other field, so sending a stake is a validation error. The seed is an HMAC of the match under a server secret, so nobody can work out the result from the source code. Database triggers block UPDATE, DELETE and TRUNCATE on results and events. Events are shown only when the match clock reaches them.",
+      },
+      {
+        title: "Pricing and risk",
+        body: "The odds service prices six market types from the score distribution the simulation produces. Pricing uses the same minute-by-minute core that decides the score. The risk service answers ACCEPT, LIMIT or REJECT for every stake, based on exposure across all accounts. It freezes that exposure when betting closes and has no way to touch a price or a result.",
+      },
+      {
+        title: "Money as integer kobo",
+        body: "Every amount is a BIGINT in kobo, from the database all the way to the screen. Payouts are calculated with integer arithmetic only, using the odds stored on the bet when it was accepted. The wallet ledger is append-only. The operator ledger is kept apart from customer wallets. A unique key makes settlement idempotent, so settling a match twice pays nobody twice.",
+      },
+      {
+        title: "Five clients, one match model",
+        body: "The web, TV, shop and admin apps are React 19 on Vite and share one component library. The mobile app is Expo 57 and uses the same view models. Components never call fetch or import the SDK. They render view models from a data-source interface, and a platform adapter behind it talks to the gateway. Realtime signals over WebSocket or SSE tell TanStack Query which cached data to refresh.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Enforce invariants in the database, prove them in tests",
+        body: "`docs/invariants.md` lists fourteen rules, such as one result per match, bets never reach the simulation, settlement pays on stored odds, and admin cannot pick a winner. Beside each rule it names what enforces it and the test that proves it. Where a rule could be a unique index, a CHECK or a trigger, I made it one, because application code can be bypassed and a constraint cannot.",
+      },
+      {
+        title: "Close betting before the match is played",
+        body: "The simulation runs at kick-off, after betting has closed and exposure is frozen. No bet can be accepted once the result exists, so there is nothing for a bet to influence. The result is created at kick-off and only revealed as the match plays out.",
+      },
+      {
+        title: "TypeScript for the plumbing, Python for the maths",
+        body: "The gateway, ledgers, identity and match lifecycle are TypeScript on Zudojs and Prisma. The probability model, pricing, risk and analytics are Python with FastAPI and psycopg. Both sides use the same camelCase wire format: Zod schemas in `packages/contracts`, with matching Pydantic models on the Python side. So changing language never means changing the contract.",
+      },
+      {
+        title: "No stand-in backend for the clients",
+        body: "There is no offline mock. Development, the browser test suites and production all run against the real platform. `pnpm verify` fails if a production bundle references a mock, a data-source switch or a demo credential. The clients take longer to start, but they cannot drift from the API.",
+      },
+    ],
+    metrics: [
+      { value: "12", label: "Backend services" },
+      { value: "5", label: "Clients, one match model" },
+      { value: "187", label: "Gateway routes" },
+      { value: "14", label: "Invariants, each with a test" },
+    ],
+    stack: [
+      "TypeScript",
+      "Node.js 24",
+      "Zudojs",
+      "Prisma 7",
+      "Python 3.14",
+      "FastAPI",
+      "PostgreSQL 17",
+      "Redis 8",
+      "React 19",
+      "Vite",
+      "Expo",
+      "Tailwind CSS",
+      "TanStack Query",
+      "Zod",
+      "Playwright",
+      "Docker",
+    ],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/BetNg" }],
+    hue: 80,
+    featured: true,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "prooflens",
+    name: "ProofLens",
+    kind: "Claim and evidence verification",
+    category: "AI & agents",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "Checks whether the documents you attach support the claim you are making. Rule checks run before the model, every cited passage is validated against the stored page, and the verdict points back to the exact sentence it rests on.",
+    overview: [
+      "ProofLens answers one question: does the evidence I supplied support the claim I am making? You write a claim, attach a PDF, a text file or a pasted passage, and get one of four verdicts with the reasoning and the page it came from.",
+      "A source can be real and still not say what a claim says. A study finds an association and the claim says it proves causation. A report says 1,200 participants and the claim says 10,000. ProofLens finds that gap, explains it in plain language and shows the sentence behind it.",
+      "I built it alone for GOMYCODE Nigeria's Come Build with AI 2026. The backend is FastAPI over PostgreSQL, the web client is Next.js 16 and the mobile client is Expo. It is not a chatbot or a web search: it reasons only over the evidence you attach.",
+    ],
+    problem: [
+      "A language model asked to check a claim will answer confidently whether or not the document supports it. It can cite a page that does not exist, quote a sentence nobody wrote, or follow an instruction hidden in the document it was asked to read.",
+      "So the model could not be the authority. The verdict had to be something a person can check by opening the source, and the system had to fail visibly when reasoning is unavailable. An invented verdict is worse than no verdict.",
+      "The clients were the other risk. If a phone or a browser holds verification logic or an AI key, there are three places where the answer can differ. All of it had to live on the backend.",
+    ],
+    architecture: [
+      {
+        title: "Six modules in four layers",
+        body: "The backend is split into users, claims, documents, evidence, verification and ai. Each module has a domain, an application layer of commands and queries, infrastructure and a presentation layer. The API is 22 routes under `/api/v1` over nine PostgreSQL tables, with async SQLAlchemy 2 and ten Alembic migrations.",
+      },
+      {
+        title: "Documents stored page by page",
+        body: "A PDF is parsed by PyMuPDF in a separate subprocess with a time limit and a memory limit, so a hostile file cannot take the API down. Text is stored per page. Evidence is a passage that keeps its document, page and section, which is what lets a result link back to the right place.",
+      },
+      {
+        title: "Rule checks before the model",
+        body: "Deterministic checks compare the claim with the best-matching passage: numbers, dates, names, negation, causation against association, and absolute or hedged wording. No model is involved. Each check becomes a finding the user can read, and the findings are passed to the model as input.",
+      },
+      {
+        title: "One provider interface, four providers",
+        body: "Groq, Google Gemini, NVIDIA NIM and Ollama sit behind one `InferenceProvider` interface. Which one runs is configuration. Every provider must answer in a strict JSON schema, and fallback models are tried in order when one errors, times out or keeps returning invalid output.",
+      },
+      {
+        title: "The backend validates the answer",
+        body: "The model's answer is parsed with Pydantic. A reference to a passage that was never supplied is dropped. A quote must appear word for word in the stored passage or it is cleared. Document and page always come from the database, never from the model.",
+      },
+      {
+        title: "Results keep their evidence",
+        body: "Each verification stores a snapshot of the evidence it used. A past result can be shown without calling the model again, and evidence that a stored result depends on cannot be deleted.",
+      },
+      {
+        title: "Two clients that hold no secrets",
+        body: "The web app keeps the session token in an httpOnly cookie and sends browser calls through a same-origin proxy. The mobile app keeps it in SecureStore. Neither client contains verification logic or calls an AI provider. AI and email keys exist only in the backend's environment.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Rules can overrule the model",
+        body: "A conflict in a number, a date or a name overrides a model that says supported. A causation gap caps the verdict at partially supported. The model explains, but it does not get the last word on a fact the backend can check itself.",
+      },
+      {
+        title: "No verdict called true",
+        body: "The four verdicts are supported, partially supported, contradicted and insufficient evidence. Every one is a statement about the supplied evidence, not about the world. Insufficient evidence is its own outcome, so a source that does not cover the claim is never confused with a source that says the opposite.",
+      },
+      {
+        title: "Document text is untrusted data",
+        body: "Passages are wrapped as data before they reach the prompt, so a sentence inside a PDF cannot act as an instruction. The integration suite includes prompt-injection cases and a provider outage, and checks that the user sees an error with a retry instead of a made-up verdict.",
+      },
+      {
+        title: "Security controls that fail closed",
+        body: "Passwords use Argon2id. Session tokens are stored only as SHA-256 hashes and capped at five per user. Sign-up codes are hashed, single use and expire in ten minutes. Rate limits are stored in PostgreSQL and fail closed. Another user's claim or document answers 404, not 403.",
+      },
+    ],
+    metrics: [
+      { value: "297", label: "Backend tests passing" },
+      { value: "4", label: "Verdicts, none called true" },
+      { value: "4", label: "AI providers, one interface" },
+      { value: "22", label: "API routes" },
+    ],
+    stack: [
+      "Python",
+      "FastAPI",
+      "SQLAlchemy 2",
+      "Alembic",
+      "PostgreSQL 17",
+      "Pydantic",
+      "PyMuPDF",
+      "Next.js 16",
+      "React 19",
+      "Expo",
+      "TypeScript",
+      "Groq",
+      "Gemini",
+      "NVIDIA NIM",
+      "Ollama",
+    ],
+    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/ProofLens" }],
+    hue: 16,
+    featured: true,
+  },
+
+  /* ================================================================== */
+  {
+    slug: "powerwatch",
+    name: "PowerWatch",
+    kind: "Power-outage reporting platform",
+    category: "Civic & infrastructure",
+    year: "2026",
+    role: "Author",
+    status: "Open source",
+    summary:
+      "Community-reported electricity status for Nigerian neighbourhoods: an Expo mobile app, a Fastify API and a landing page. A neighbourhood's status follows the majority of distinct people who reported in the last 30 minutes.",
+    overview: [
+      "PowerWatch lets people report in one tap whether power is on or off where they live, and see the status of their neighbourhood before they get home. Everyone following that neighbourhood gets a push notification when the status changes.",
+      "It began as a team project for the Orange internship programme 2026, where I built the backend. The repository now holds three parts: the API, a mobile app for Android and iPhone, and a landing page. The API is Fastify 5 and Prisma 7 over MySQL, with 74 endpoints across eight route groups.",
+      "The interesting part is the geography. \"Is the power out?\" is a question about a neighbourhood, but outages are caused at substation and feeder level, which does not map onto any address a person would type.",
+    ],
+    problem: [
+      "Nigerian grid supply is unreliable in ways that are locally obvious and nationally invisible. There is no shared record of who is off, for how long, or how often, so nobody can tell a bad week from a bad transformer.",
+      "Crowd-sourcing that record has two hard parts. The first is location: a report is only useful if it lands in the right area, and Nigerian addressing does not reliably resolve below a local government area. The second is trust: one wrong or repeated report must not flip the status of a whole neighbourhood.",
+      "It also has to work on a phone, on mobile data, during a blackout. That rules out anything heavy.",
+    ],
+    architecture: [
+      {
+        title: "Six-level geographic hierarchy",
+        body: "Country → State → LGA → City → Town → Neighborhood, modelled as first-class entities and seeded with Nigeria's 37 states and their LGAs and towns. A report attaches at the finest level the user can identify, and every summary rolls up through the chain, so the same data answers both \"is my street off\" and \"how did Ondo State do this month\".",
+      },
+      {
+        title: "Consensus decides the status",
+        body: "Each person is counted once, by their most recent report in the window. The neighbourhood's status is the majority of those reporters over the last 30 minutes, and a tie keeps the current status. The server also refuses a second report from the same person for the same neighbourhood within 5 minutes.",
+      },
+      {
+        title: "Reports, outages and the join between them",
+        body: "Report is what a person submitted. Outage is the event. OutageReport joins them. When the consensus flips to OFF an outage starts at the earliest OFF report that was counted, and when it flips back the outage closes with its duration recorded.",
+      },
+      {
+        title: "Pre-aggregated summaries",
+        body: "DailyReportSummary, WeeklyOutageSummary and MonthlyStatistic hold report counts, outage totals and the longest outage per neighbourhood, so weekly and monthly figures are not recomputed from the report table on every request.",
+      },
+      {
+        title: "Layered Fastify backend",
+        body: "routes → controllers → services → repositories, with services split into commands and queries across ten areas, and Swagger generated from the route schemas. There are 21 Prisma models, and Prisma 7 talks to MySQL through the MariaDB adapter.",
+      },
+      {
+        title: "Auth and delivery",
+        body: "JWT access and refresh tokens with device-bound sessions, a 6-digit email code for sign-up and password reset, and rate limiting on the public routes. Push notifications go through the Expo Push Service, and outage alerts, restoration alerts and community updates each have their own switch. Every notification is stored in NotificationLog.",
+      },
+      {
+        title: "Mobile app and landing page",
+        body: "The app is Expo SDK 57 with Expo Router, 26 screens in light and dark mode, and a MapLibre map of nearby neighbourhoods coloured by status. The session token lives in SecureStore. The landing page is React 19 on Vite with Tailwind CSS and explains the app from 320 px phones up to desktop.",
+      },
+      {
+        title: "Audit trail",
+        body: "AuditLog and NotificationLog record who changed what and what was actually delivered. On a civic dataset that may be cited, being able to reconstruct the record matters more than saving the rows.",
+      },
+    ],
+    decisions: [
+      {
+        title: "Count people, not reports",
+        body: "A status that follows the latest report can be flipped by one person. Counting each person once inside a time window means a wrong report is outvoted, and reporting ten times counts as reporting once.",
+      },
+      {
+        title: "Geocode, then fall back offline",
+        body: "GPS coordinates are resolved through OSM Nominatim's boundary data, falling back to a local LGA coordinate dataset when that fails, and mapped onto the seeded six-level hierarchy. A first version used LGA centre points, which put reports near a boundary in the wrong area.",
+      },
+      {
+        title: "Materialise the summaries",
+        body: "The map and history read from pre-aggregated tables. Live aggregation over reports would have been simpler until the first thousand rows, and then permanently slower.",
+      },
+    ],
+    metrics: [
+      { value: "74", label: "API endpoints" },
+      { value: "21", label: "Prisma models" },
+      { value: "26", label: "Mobile screens" },
+      { value: "6", label: "Geographic levels" },
+    ],
+    stack: [
+      "TypeScript",
+      "Fastify 5",
+      "Prisma 7",
+      "MySQL",
+      "Expo",
+      "React Native",
+      "MapLibre",
+      "React 19",
+      "Vite",
+      "Tailwind CSS",
+      "Expo Push",
+      "Swagger",
+      "Zod",
+      "Nodemailer",
+    ],
+    links: [
+      { label: "Live", href: "https://powerwatch-one.vercel.app" },
+      { label: "Source", href: "https://github.com/oyinlola-tech/PowerWatch" },
+    ],
+    hue: 46,
+    featured: true,
+  },
+
+  /* ================================================================== */
+  {
     slug: "kolo",
     name: "Kolo",
     kind: "Cooperative savings & payments infrastructure",
@@ -390,95 +684,7 @@ export const work: CaseStudy[] = [
     stack: ["TypeScript", "Node.js", "tsx", "Gemini", "Groq", "Solari"],
     links: [],
     hue: 150,
-    featured: true,
-  },
-
-  /* ================================================================== */
-  {
-    slug: "powerwatch",
-    name: "PowerWatch",
-    kind: "Power-outage reporting platform",
-    category: "Civic & infrastructure",
-    year: "2026",
-    role: "Backend engineer",
-    summary:
-      "Crowd-sourced electricity outage tracking for Nigeria — a six-level geographic hierarchy, map-based reporting, and outage tracking — the backend of a team project for the Orange internship programme.",
-    overview: [
-      "PowerWatch lets people report power outages where they live and see what is happening around them on a map. Reports open, join and close outages; outages roll up into daily, weekly and monthly summaries by area.",
-      "It was a team project for the Orange internship programme 2026. I built the backend — Fastify and Prisma against MySQL, 62 endpoints across eight route groups — and a teammate built the React and MapLibre frontend.",
-      "The interesting part is the geography. \"Is the power out?\" is a question about a neighbourhood, but outages are caused at substation and feeder level, which does not map onto any address a person would type.",
-    ],
-    problem: [
-      "Nigerian grid supply is unreliable in ways that are locally obvious and nationally invisible. There is no shared record of who is off, for how long, or how often — so nobody can tell a bad week from a bad transformer.",
-      "Crowd-sourcing that record has two hard parts. First, location: a report is only useful if it lands in the right area, and Nigerian addressing does not reliably resolve below a local government area. Second, aggregation: fifty people reporting the same blackout is one outage, not fifty, and deciding that automatically is the whole product.",
-      "It also has to work on a phone, on mobile data, during a blackout — which rules out anything heavy.",
-    ],
-    architecture: [
-      {
-        title: "Six-level geographic hierarchy",
-        body: "Country → State → LGA → City → Town → Neighborhood, modelled as first-class entities and seeded from Nigerian LGA datasets. A report attaches at the finest level the user can identify, and every summary rolls up through the chain, so the same data answers both \"is my street off\" and \"how did Ondo State do this month\".",
-      },
-      {
-        title: "Reports, outages and the join between them",
-        body: "Report is what a person submitted. Outage is the event. OutageReport joins them. An OFF report opens an outage for its neighbourhood if none is open, or joins the open one and increments its report count; an ON report closes it and records the duration in minutes — all inside one database transaction.",
-      },
-      {
-        title: "Pre-aggregated summaries",
-        body: "DailyReportSummary, WeeklyOutageSummary and MonthlyStatistic are materialised on demand through three admin endpoints rather than computed per request. Analytics over a growing report table is the thing that would have made the map slow.",
-      },
-      {
-        title: "Layered Fastify backend",
-        body: "routes → controllers → services → repositories → models, with services split into commands and queries across eleven areas, DTOs, validators, enums, errors and loaders as separate concerns, and Swagger generated from the route schemas. Twenty Prisma models over MySQL.",
-      },
-      {
-        title: "Auth and delivery",
-        body: "JWT with refresh tokens and device-bound sessions, OTP verification by email, rate limiting on the public routes, and Firebase Cloud Messaging for admin broadcasts and topic subscriptions, with every in-app notification stored in NotificationLog.",
-      },
-      {
-        title: "Frontend, built by a teammate",
-        body: "React 19 with MapLibre and react-map-gl for the heatmap and monitoring views, Tailwind for layout and Mixpanel for product analytics — built by a teammate against the backend's Swagger contract.",
-      },
-      {
-        title: "Audit trail",
-        body: "AuditLog and NotificationLog record who changed what and what was actually delivered. On a civic dataset that may be cited, being able to reconstruct the record matters more than saving the rows.",
-      },
-    ],
-    decisions: [
-      {
-        title: "Geocode, then fall back offline",
-        body: "GPS coordinates are resolved through OSM Nominatim's boundary data, falling back to a local LGA coordinate dataset when that fails, and mapped onto the seeded six-level hierarchy. A first version used LGA centre points, which put reports near a boundary in the wrong area.",
-      },
-      {
-        title: "One open outage per neighbourhood",
-        body: "Whether a report opens, joins or closes an outage is decided in the same transaction that stores the report. Fifty people reporting one blackout produce one outage with fifty reports, never fifty outages racing each other.",
-      },
-      {
-        title: "Materialise the summaries",
-        body: "The map and dashboards read from pre-aggregated tables. Live aggregation over reports would have been simpler until the first thousand rows, and then permanently slower.",
-      },
-    ],
-    metrics: [
-      { value: "20", label: "Prisma models" },
-      { value: "6", label: "Geographic levels" },
-      { value: "3", label: "Summary rollups" },
-      { value: "62", label: "API endpoints" },
-    ],
-    stack: [
-      "TypeScript",
-      "Fastify",
-      "Prisma",
-      "MySQL",
-      "React",
-      "MapLibre",
-      "Firebase Admin",
-      "Mixpanel",
-      "Swagger",
-      "Zod",
-      "Nodemailer",
-    ],
-    links: [{ label: "Source", href: "https://github.com/circorangeintern/Prism-circle" }],
-    hue: 46,
-    featured: true,
+    featured: false,
   },
 
   /* ================================================================== */
@@ -863,104 +1069,6 @@ export const work: CaseStudy[] = [
 
   /* ================================================================== */
   {
-    slug: "betng",
-    name: "BetNG",
-    kind: "Virtual football platform",
-    category: "Payments & fintech",
-    year: "2026",
-    role: "Author",
-    status: "Open source",
-    summary:
-      "A virtual football platform where every match is simulated once and seen identically on five clients: twelve TypeScript and Python services, integer-kobo money, and fourteen invariants each tied to a named test.",
-    overview: [
-      "BetNG runs four simulated football leagues of 80 clubs, round after round on a real clock. The platform simulates every match once, and every viewer sees that same match: the same fixture, prices, timeline, result and settlement. That holds on the web, on a phone, on a shop television, at a cashier terminal and in the admin console. It uses play money only.",
-      "I built it alone as a portfolio system. The gateway and seven TypeScript services run on Zudojs with Prisma. Four Python services handle simulation, odds, risk and analytics. Five clients share one set of wire contracts and one view-model layer.",
-      "The hard part was trust, not features. When the house prices the bets and also plays the match, the only credible design is one where nobody can influence, predict or edit the result. The database has to enforce that and tests have to prove it. A README promise is not enough.",
-    ],
-    problem: [
-      "A virtual sports product is a chain of authorities. A scheduler creates fixtures, an odds engine prices them, a risk engine decides how much it will accept, betting closes, a simulation plays the match and settlement pays out. Each link must be the only one allowed to make its decision, and none may see further along the chain than it needs to.",
-      "The obvious failure is a result that bets can reach. The product is rigged, whether anyone means it or not, if any of three things is true: the simulation can see stakes, an admin can re-run a match, or the seed can be computed from public inputs.",
-      "The quieter failure is five clients drifting apart. A phone that works out its own payout, or a TV that runs its own clock, will eventually show a number the platform never agreed to. So the clients had to display state and never produce it.",
-    ],
-    architecture: [
-      {
-        title: "Twelve services, one schema each",
-        body: "There is a public gateway, seven TypeScript services (match, betting, wallet, settlement, identity, event, email) and four Python services (simulation, odds, risk, analytics). Each service that stores data owns one PostgreSQL schema and has a login that can write only that schema. A write to another service's data goes through that service's `POST /rpc` and needs an internal token. Redis holds locks, caches and rate-limit counters, and is never the source of truth.",
-      },
-      {
-        title: "The gateway as a route table",
-        body: "The public API is 187 routes declared as data: the path, the service that owns it and who may call it. The gateway checks the session, removes any incoming `x-betng-*` header and rebuilds the actor from the session, so a service never trusts a user id taken from a path or body. Rate limits on bets, deposits and withdrawals fail closed. No route sets a score or a winner.",
-      },
-      {
-        title: "A fifteen-state match lifecycle",
-        body: "A match moves from FIXTURE_CREATED through BETTING_CLOSED, SIMULATION_STARTED and MATCH_FINISHED to SETTLEMENT_COMPLETED. There are also failure states and VOIDED. Every transition is stored as a row. The scheduler ticks once a second behind a Redis lock, so only one instance ever drives it. With the default settings a match minute lasts two seconds.",
-      },
-      {
-        title: "A simulation that cannot be steered",
-        body: "Betting closes before kick-off. The simulation then plays the match once, minute by minute, from the match id and the two teams' strengths. Its request models reject every other field, so sending a stake is a validation error. The seed is an HMAC of the match under a server secret, so nobody can work out the result from the source code. Database triggers block UPDATE, DELETE and TRUNCATE on results and events. Events are shown only when the match clock reaches them.",
-      },
-      {
-        title: "Pricing and risk",
-        body: "The odds service prices six market types from the score distribution the simulation produces. Pricing uses the same minute-by-minute core that decides the score. The risk service answers ACCEPT, LIMIT or REJECT for every stake, based on exposure across all accounts. It freezes that exposure when betting closes and has no way to touch a price or a result.",
-      },
-      {
-        title: "Money as integer kobo",
-        body: "Every amount is a BIGINT in kobo, from the database all the way to the screen. Payouts are calculated with integer arithmetic only, using the odds stored on the bet when it was accepted. The wallet ledger is append-only. The operator ledger is kept apart from customer wallets. A unique key makes settlement idempotent, so settling a match twice pays nobody twice.",
-      },
-      {
-        title: "Five clients, one match model",
-        body: "The web, TV, shop and admin apps are React 19 on Vite and share one component library. The mobile app is Expo 54 and uses the same view models. Components never call fetch or import the SDK. They render view models from a data-source interface, and a platform adapter behind it talks to the gateway. Realtime signals over WebSocket or SSE tell TanStack Query which cached data to refresh.",
-      },
-    ],
-    decisions: [
-      {
-        title: "Enforce invariants in the database, prove them in tests",
-        body: "`docs/invariants.md` lists fourteen rules, such as one result per match, bets never reach the simulation, settlement pays on stored odds, and admin cannot pick a winner. Beside each rule it names what enforces it and the test that proves it. Where a rule could be a unique index, a CHECK or a trigger, I made it one, because application code can be bypassed and a constraint cannot.",
-      },
-      {
-        title: "Close betting before the match is played",
-        body: "The simulation runs at kick-off, after betting has closed and exposure is frozen. No bet can be accepted once the result exists, so there is nothing for a bet to influence. The result is created at kick-off and only revealed as the match plays out.",
-      },
-      {
-        title: "TypeScript for the plumbing, Python for the maths",
-        body: "The gateway, ledgers, identity and match lifecycle are TypeScript on Zudojs and Prisma. The probability model, pricing, risk and analytics are Python with FastAPI and psycopg. Both sides use the same camelCase wire format: Zod schemas in `packages/contracts`, with matching Pydantic models on the Python side. So changing language never means changing the contract.",
-      },
-      {
-        title: "No stand-in backend for the clients",
-        body: "There is no offline mock. Development, the browser test suites and production all run against the real platform. `pnpm verify` fails if a production bundle references a mock, a data-source switch or a demo credential. The clients take longer to start, but they cannot drift from the API.",
-      },
-    ],
-    metrics: [
-      { value: "12", label: "Backend services" },
-      { value: "5", label: "Clients, one match model" },
-      { value: "187", label: "Gateway routes" },
-      { value: "14", label: "Invariants, each with a test" },
-    ],
-    stack: [
-      "TypeScript",
-      "Node.js 24",
-      "Zudojs",
-      "Prisma 7",
-      "Python 3.14",
-      "FastAPI",
-      "PostgreSQL 17",
-      "Redis 8",
-      "React 19",
-      "Vite",
-      "Expo",
-      "Tailwind CSS",
-      "TanStack Query",
-      "Zod",
-      "Playwright",
-      "Docker",
-    ],
-    links: [{ label: "Source", href: "https://github.com/oyinlola-tech/BetNg" }],
-    hue: 80,
-    featured: false,
-  },
-
-  /* ================================================================== */
-  {
     slug: "church-cms",
     name: "Church Management System",
     kind: "Church records & public website",
@@ -1222,7 +1330,7 @@ export const work: CaseStudy[] = [
       { label: "Source", href: "https://github.com/oyinlola-tech/utils-tools" },
     ],
     hue: 44,
-    featured: true,
+    featured: false,
   },
 
   /* ================================================================== */

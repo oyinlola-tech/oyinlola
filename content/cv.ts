@@ -138,6 +138,18 @@ export const projects: CvProject[] = [
     tech: "TypeScript · Python · FastAPI · PostgreSQL · Redis · React · Expo · Playwright · Docker",
   },
   {
+    name: "ProofLens",
+    role: "Author, Open Source",
+    slug: "prooflens",
+    line: "Checks whether the documents you attach actually support the claim you are making, on web and mobile.",
+    points: [
+      "Compares numbers, dates, names, negation and causation with fixed rules before any AI model is asked, and lets those rules overrule the model.",
+      "Validates every passage the model cites against the stored page, so it cannot quote a sentence or a page that does not exist.",
+      "Runs on Groq, Gemini, NVIDIA NIM or Ollama behind one interface, and shows an error with a retry when reasoning is unavailable instead of inventing a verdict.",
+    ],
+    tech: "Python · FastAPI · SQLAlchemy · PostgreSQL · Pydantic · Next.js · Expo · TypeScript",
+  },
+  {
     name: "SentinelX",
     role: "Author, Open Source",
     slug: "sentinelx",
@@ -210,18 +222,19 @@ export const projects: CvProject[] = [
   },
   {
     name: "PowerWatch",
-    role: "Backend Engineer, Team Project",
+    role: "Author, Open Source",
     slug: "powerwatch",
-    line: "Lets people report power outages where they live and see outages near them on a map.",
+    line: "Lets people report in one tap whether power is on or off where they live, and alerts their neighbours when it changes.",
     points: [
-      "Built the backend for an Orange internship team: reports, outages, notifications and area summaries.",
+      "Built the API, the Android and iPhone app and the landing page. It began as the backend of an Orange internship team project.",
+      "Decides a neighbourhood's status from the majority of distinct people who reported in the last 30 minutes, so one wrong report cannot flip it.",
       "Places every report in a location hierarchy from state down to neighbourhood, so the same data answers street-level and state-level questions.",
-      "Turns many reports of one blackout into a single outage with a start, an end and a duration.",
     ],
-    tech: "TypeScript · Fastify · Prisma · MySQL · Firebase · Swagger",
+    tech: "TypeScript · Fastify · Prisma · MySQL · Expo · React Native · MapLibre · Swagger",
   },
   {
     name: "Utils-tool",
+    paper: false,
     role: "Author, Live",
     slug: "utils-tool",
     line: "Image, PDF, file and developer tools that run on your own machine or online, with no accounts and no stored uploads.",
