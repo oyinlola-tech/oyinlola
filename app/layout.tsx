@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     "TypeScript",
     "Nigeria",
     "Oluwayemi Oyinlola Michael",
-    "ZudoMart",
+    "Nantty",
   ],
   authors: [{ name: site.name, url: site.url }],
   creator: site.name,

@@ -17,7 +17,7 @@ export const site = {
   timezone: "WAT · UTC+1",
   email: "oluwayemioyinlola2@gmail.com",
   phone: "+234 913 351 9489",
-  url: "https://portfolio.oyinlola.site",
+  url: "https://www.oyinlola.site",
   available: true,
   availableFor: "Backend, platform and software engineering roles",
 } as const;
@@ -34,7 +34,7 @@ export const links = {
   github: "https://github.com/oyinlola-tech",
   linkedin: "https://linkedin.com/in/oluwayemioyinlola",
   twitter: "https://twitter.com/oyinlola141",
-  site: "https://portfolio.oyinlola.site",
+  site: "https://www.oyinlola.site",
   cv: "/cv",
 } as const;
 
@@ -67,13 +67,13 @@ export function navIndex(href: string): string {
 
 /** Hero telemetry. Every figure is countable in a repository. */
 export const telemetry = [
-  { value: "79", label: "Go modules", detail: "Zudomart · 5 domains" },
+  { value: "7", label: "Product apps", detail: "Nantty · one product" },
   { value: "39", label: "TS packages", detail: "Zudojs framework" },
   // Literal rather than derived from `work`: content/site.ts is imported by
   // the OG image route, which has a 500KB bundle budget, and pulling the whole
   // case-study file in to count it would spend most of that on prose.
   { value: "31", label: "Case studies", detail: "Shipped & in progress" },
-  { value: "3", label: "Core languages", detail: "Go · Python · TypeScript" },
+  { value: "4", label: "Backend languages", detail: "Go · TypeScript · Elixir · Python" },
 ] as const;
 
 /* ------------------------------------------------------------------ *
@@ -133,7 +133,7 @@ export const disciplines: Discipline[] = [
     id: "data",
     title: "Data",
     lede: "Where the work is heading.",
-    body: "Deliberately moving toward Python and data engineering — pipelines, event processing, ranking and recommendation, and the analytics that make a product improve rather than just run. In Zudomart this is a separate Python service so a retrained ranker never requires redeploying the payments path.",
+    body: "Deliberately moving toward Python and data engineering — pipelines, event processing, ranking and recommendation, and the analytics that make a product improve rather than just run. In Nantty, a separate Python intelligence service supplies scores while product services retain the decisions.",
     items: [
       "Python",
       "FastAPI",
@@ -223,11 +223,11 @@ export type Role = {
 export const experience: Role[] = [
   {
     title: "Founder & Lead Engineer",
-    org: "ZudoMart",
-    period: "2023 — present",
+    org: "Nantty",
+    period: "In development",
     current: true,
     points: [
-      "Leading ZudoMart as an early-stage startup, currently in MVP refinement.",
+      "Founded and lead Nantty, a social marketplace currently under development.",
       "Building and validating trust-first product flows for commerce, services and micro-gigs.",
       "Designing escrow, verification and safety workflows for real-world informal trading.",
       "Executing milestone-driven delivery aligned with EquityPilot support and market validation.",
@@ -268,7 +268,7 @@ export type Principle = { title: string; body: string };
 export const principles: Principle[] = [
   {
     title: "Boundaries before frameworks",
-    body: "Most systems fail at the seams, not in the middle. I draw module boundaries and type contracts first, then pick the framework that fits them — which is why Zudomart is 79 Go modules in one deployable, not 79 services.",
+    body: "Most systems fail at the seams, not in the middle. I draw module boundaries and type contracts first, then pick the framework that fits them — a principle I am applying across Nantty's Go, TypeScript, Elixir and Python services.",
   },
   {
     title: "A monolith you can split",

@@ -12,8 +12,14 @@ import { site } from "@/content/site";
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = ["", "/work", "/engineering", "/lab", "/about", "/cv", "/contact"];
-  return [
-    ...pages.map((p) => ({ url: `${site.url}${p}` })),
-    ...work.map((w) => ({ url: `${site.url}/work/${w.slug}` })),
+  const urls = [
+    ...pages.map((p) => `${site.url}${p}`),
+    ...work.map((w) => `${site.url}/work/${w.slug}`),
   ];
+
+  if (new Set(urls).size !== urls.length) {
+    throw new Error("Sitemap contains duplicate URLs");
+  }
+
+  return urls.map((url) => ({ url }));
 }

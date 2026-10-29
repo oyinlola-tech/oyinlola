@@ -1,8 +1,8 @@
-# portfolio.oyinlola.site
+# www.oyinlola.site
 
 Portfolio of **Oluwayemi Oyinlola Michael** — software engineer, backend developer.
 
-Seven pages, fifteen long-form case studies, an interactive shell, a
+Seven primary content routes, thirty-one long-form case studies, an interactive shell, a
 printable CV, and a procedural WebGL hero. Everything is prerendered except
 the contact endpoint.
 
@@ -28,7 +28,7 @@ the contact endpoint.
 
 ## Rules this repo keeps
 
-**Every number is countable.** 74 Go modules, 39 packages, 47 Prisma models,
+**Every number is countable.** 39 packages, 47 Prisma models,
 31 relational models, 150+ routes, 28 tools, 20 models, 27 route modules —
 each was read out of the corresponding repository, not estimated. If you can't
 count it in the source, don't put it in `content/work.ts`.
@@ -37,7 +37,7 @@ count it in the source, don't put it in `content/work.ts`.
 200 — the count is whatever `npm run check:links` reports, deliberately not a
 number written here that would drift from it. Projects whose repositories are
 private, or whose deployments have gone down, carry **no link** rather than a
-broken one. That is why Zudomart, Telente CBT, AgentLab, PowerWatch, IKALE and
+broken one. That is why Nantty, Telente CBT, AgentLab, PowerWatch, IKALE and
 the Newdich site have no source link, and why several `*.telente.site` and
 `*.vercel.app` deployments that no longer resolve are absent.
 
@@ -138,7 +138,7 @@ components/
 
 content/
   site.ts   Profile, nav, telemetry, capabilities, CV, principles
-  work.ts   The thirteen case studies + the open-source index
+  work.ts   The case studies + the open-source index
 ```
 
 **All copy lives in `content/`.** Editing a case study never means touching a
@@ -171,11 +171,11 @@ modelled on:
 
 ### The constellation
 
-`components/hero/ConstellationCanvas.tsx` draws Zudomart's actual
-architecture: five clusters sized 29 / 23 / 17 / 17 / 8, wired within
-themselves and joined across by an event spine that carries travelling
-pulses. Two draw calls — one `THREE.Points` for modules and their file haze,
-one `THREE.LineSegments` for the wiring.
+`components/hero/ConstellationCanvas.tsx` draws a conceptual map of Nantty's
+client and service domains, wired within themselves and joined across by an
+event spine that carries travelling pulses. Cluster sizes are visual weights,
+not source-code module counts. Two draw calls — one `THREE.Points` for nodes
+and their file haze, one `THREE.LineSegments` for the wiring.
 
 It behaves under pressure:
 
@@ -189,7 +189,7 @@ It behaves under pressure:
   shader, so the falloff is identical regardless of what `premultipliedAlpha`
   the context reports.
 
-Knobs: `DOMAINS` (cluster sizes and hues), `ringR` and `spread` (layout),
+Knobs: `DOMAINS` (visual cluster weights and hues), `ringR` and `spread` (layout),
 `SCAN_DURATION`, and the `base` / `cover` terms in the two fragment shaders.
 
 ---
@@ -203,7 +203,9 @@ is there, so adding a fourteenth project is a data change.
 `featured: true` promotes a project to a full-width row; everything else is a
 compact card. `hue` drives that project's generated lattice sigil
 (`ProjectSigil.tsx`) — a deterministic pattern seeded from the slug, which is
-why the site needs no screenshots.
+why the site needs no screenshots. Nantty is pre-launch; its case study marks
+the distinction between implemented code, local mock flows, and deployment
+that remains planned.
 
 ---
 
@@ -223,7 +225,10 @@ why the site needs no screenshots.
 npx vercel
 ```
 
-No environment variables — there are none.
+Contact delivery uses `RESEND_API_KEY` and `CONTACT_FROM_EMAIL`; see
+`.env.example`. `GOOGLE_SITE_VERIFICATION` is optional. The generated sitemap
+is available at `https://www.oyinlola.site/sitemap.xml` and is also
+listed by `/robots.txt` for Search Console discovery.
 
 ---
 

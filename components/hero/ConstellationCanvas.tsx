@@ -4,28 +4,16 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /**
- * The system constellation.
- *
- * Zudomart is 74 modules across five bounded domains, and this draws exactly
- * that: five clusters, sized 29 / 17 / 8 / 23 / 17, wired within themselves
- * and joined across by an event spine. It is a picture of the architecture
- * the rest of the page talks about, not decoration that happens to be blue.
- *
- * Two draw calls — one THREE.Points for the modules and their file haze, one
- * THREE.LineSegments for the wiring. Everything else is shader work.
- *
- * The entrance is the survey pulse from ThreeUI's Sylva hero: a wavefront
- * expands from the lower left and nothing renders until the front has passed
- * over it, so the system draws itself in rather than fading up.
+ * A conceptual map of Nantty's client and service domains.
+ * Cluster size is a visual weight, not a module or service count.
+ * Two draw calls — points for nodes and line segments for their connections.
  */
-
-/* Domain sizes, from internals/ in the Zudomart repository. */
 const DOMAINS = [
-  { name: "commerce", count: 29, color: 0xffb067 },
-  { name: "platform", count: 23, color: 0x56d6c0 },
-  { name: "social", count: 17, color: 0x6e92ff },
-  { name: "core", count: 17, color: 0xd8e2ff },
-  { name: "creator", count: 8, color: 0x9b8cff },
+  { name: "clients", count: 29, color: 0xffb067 },
+  { name: "commerce", count: 23, color: 0x56d6c0 },
+  { name: "platform", count: 17, color: 0x6e92ff },
+  { name: "social", count: 17, color: 0xd8e2ff },
+  { name: "intelligence", count: 8, color: 0x9b8cff },
 ];
 
 const SCAN_DURATION = 3.2;

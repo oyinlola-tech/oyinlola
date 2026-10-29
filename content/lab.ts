@@ -61,8 +61,8 @@ export const experiments: Experiment[] = [
   },
   {
     title: "Architecture as a picture",
-    question: "What does a 79-module system look like?",
-    body: "The hero draws Zudomart's real shape: five clusters sized by domain, wired internally and joined by an event spine carrying travelling pulses. Two draw calls, one Points and one LineSegments, with the reveal driven by an expanding wavefront rather than a fade.",
+    question: "How can a complex product architecture be made visible?",
+    body: "The hero turns Nantty's client and service domains into a conceptual constellation, connected by an event spine with travelling pulses. Cluster size is visual weight, not a count of modules or deployed services. Two draw calls, one Points and one LineSegments, with the reveal driven by an expanding wavefront rather than a fade.",
     tags: ["Three.js", "GLSL", "WebGL"],
     status: "Shipped",
   },

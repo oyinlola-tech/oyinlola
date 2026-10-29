@@ -166,13 +166,17 @@ describe("routes", () => {
   });
 
   it("only lists routes in the sitemap that exist", () => {
-    // A sitemap entry that 404s is a Search Console error, and the sitemap
-    // is written by hand for the static pages.
-    const statics = ["", "/work", "/engineering", "/lab", "/about", "/cv", "/contact"];
-    const missing = statics.filter(
-      (p) => !existsSync(join(ROOT, "app", p.replace(/^\//, ""), "page.tsx")),
-    );
+    const source = readFileSync(join(ROOT, "app/sitemap.ts"), "utf8");
+    const statics = [...source.matchAll(/\"(\/(?:work|engineering|lab|about|cv|contact))\"/g)].map((m) => m[1]);
+    expect(statics).toContain("/contact");
+    const missing = statics.filter((p) => !existsSync(join(ROOT, "app", p.slice(1), "page.tsx")));
     expect(missing).toEqual([]);
+    expect(source).toContain('`${site.url}/work/${w.slug}`');
+  });
+
+  it("advertises the production sitemap from robots", () => {
+    const source = readFileSync(join(ROOT, "app/robots.ts"), "utf8");
+    expect(source).toContain("/sitemap.xml");
   });
 
   it("has a case-study route for the dynamic segment", () => {
@@ -254,38 +258,26 @@ describe("numbering", () => {
   });
 });
 
-describe("Zudomart's module count", () => {
-  /* The page claimed 74 modules beside a domain breakdown that added up to
-     94, in the same paragraph. Both numbers were wrong — the repository has
-     79 — but the contradiction is the part a test can catch. */
-  const zudomart = work.find((w) => w.slug === "zudomart");
-  const heading = zudomart?.architecture.find((a) => /\d+ modules/.test(a.title));
-  const stated = Number(heading?.title.match(/(\d+) modules/)?.[1]);
-  const domains = [...(heading?.body.matchAll(/\((\d+)(?: modules)? —/g) ?? [])].map((m) =>
-    Number(m[1]),
-  );
+describe("Nantty case study", () => {
+  const nantty = work.find((w) => w.slug === "zudomart");
 
-  it("breaks down into five domains", () => {
-    expect(heading, "no architecture entry states a module count").toBeDefined();
-    expect(domains).toHaveLength(5);
+  it("keeps the established case-study URL while using the current product name", () => {
+    expect(nantty?.name).toBe("Nantty");
+    expect(nantty?.status).toBe("Private");
   });
 
-  it("adds the domains up to the number in the heading", () => {
-    expect(domains.reduce((a, b) => a + b, 0)).toBe(stated);
+  it("states the current development stage and beta and launch targets", () => {
+    expect(nantty?.year).toBe("2026 — present");
+    expect(nantty?.overview.join(" ")).toMatch(/under development/i);
+    expect(nantty?.overview.join(" ")).toMatch(/planning targets/i);
+    expect(nantty?.metrics.find((metric) => metric.label === "Early beta target")?.value).toBe("15 Jan 2027");
+    expect(nantty?.metrics.find((metric) => metric.label === "Public launch target")?.value).toBe("1 Mar 2027");
+    expect(nantty?.links).toContainEqual({ label: "Nantty website", href: "https://nantty.com" });
+    expect(nantty?.overview.join(" ")).not.toMatch(/founded in 2023/i);
   });
 
-  it("never lists more modules in a domain than it counts", () => {
-    const listed = [...heading!.body.matchAll(/\((\d+)(?: modules)? — ([^)]+)\)/g)];
-    for (const [, count, names] of listed) {
-      expect(names.split(",").length).toBeLessThanOrEqual(Number(count));
-    }
-  });
-
-  it("states the same count everywhere it is repeated", () => {
-    expect(Number(zudomart!.metrics.find((m) => m.label === "Go modules")?.value)).toBe(stated);
-    expect(Number(telemetry.find((t) => t.label === "Go modules")?.value)).toBe(stated);
-    for (const prose of [zudomart!.summary, ...zudomart!.overview]) {
-      for (const m of prose.matchAll(/(\d+) modules/g)) expect(Number(m[1])).toBe(stated);
-    }
+  it("does not retain obsolete Zudomart architecture claims", () => {
+    const copy = [nantty?.summary, ...(nantty?.overview ?? []), ...(nantty?.architecture.map((item) => item.body) ?? [])].join(" ");
+    expect(copy).not.toMatch(/79 modules|Kafka|Kubernetes/);
   });
 });

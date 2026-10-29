@@ -6,7 +6,7 @@ import DeferredConstellation from "./DeferredConstellation";
 
 const HEADLINE = ["Systems that", "hold their shape."];
 
-const zudomart = work.find((w) => w.slug === "zudomart")!;
+const nantty = work.find((w) => w.slug === "zudomart")!;
 const zudojs = work.find((w) => w.slug === "zudojs")!;
 
 /**
@@ -238,7 +238,7 @@ export default function Hero() {
 
           {/* Cards */}
           <StageCard
-            project={zudomart}
+            project={nantty}
             label="Flagship"
             left={1158}
             top={140}
