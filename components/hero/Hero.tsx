@@ -6,7 +6,7 @@ import DeferredConstellation from "./DeferredConstellation";
 
 const HEADLINE = ["Systems that", "hold their shape."];
 
-const nantty = work.find((w) => w.slug === "zudomart")!;
+const nantty = work.find((w) => w.slug === "nantty")!;
 const zudojs = work.find((w) => w.slug === "zudojs")!;
 
 /**

@@ -34,7 +34,7 @@ export type CaseStudy = {
 export const work: CaseStudy[] = [
   /* ================================================================== */
   {
-    slug: "zudomart",
+    slug: "nantty",
     name: "Nantty",
     kind: "Social marketplace",
     category: "Commerce & marketplace",

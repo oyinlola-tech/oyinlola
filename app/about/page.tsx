@@ -15,20 +15,36 @@ import {
 } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
-  title: "About",
-  description:
-    "Oluwayemi Oyinlola Michael — software engineer in Nigeria. Backend systems, developer tools and data engineering. Background, education and how I work.",
+  title: `${site.name} — ${site.role} in Lagos, Nigeria`,
+  description: site.description,
   path: "/about",
+  absoluteTitle: true,
 });
 
 export default function AboutPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            url: `${site.url}/about`,
+            name: `${site.name} — About`,
+            mainEntity: { "@id": `${site.url}/#person` },
+          }),
+        }}
+      />
       <PageHeader
         index={navIndex("/about")}
         label="About"
-        title="I build the parts you don't see."
-        lede={<>{site.positioning}</>}
+        title={site.name}
+        lede={
+          <>
+            {site.name} is a {site.role.toLowerCase()} based in {site.location}. {site.positioning}
+          </>
+        }
       />
 
       <section className="shell pb-24 lg:pb-32">

@@ -259,9 +259,10 @@ describe("numbering", () => {
 });
 
 describe("Nantty case study", () => {
-  const nantty = work.find((w) => w.slug === "zudomart");
+  const nantty = work.find((w) => w.slug === "nantty");
 
-  it("keeps the established case-study URL while using the current product name", () => {
+  it("uses the Nantty case-study URL and current product name", () => {
+    expect(nantty?.slug).toBe("nantty");
     expect(nantty?.name).toBe("Nantty");
     expect(nantty?.status).toBe("Private");
   });
@@ -276,7 +277,7 @@ describe("Nantty case study", () => {
     expect(nantty?.overview.join(" ")).not.toMatch(/founded in 2023/i);
   });
 
-  it("does not retain obsolete Zudomart architecture claims", () => {
+  it("does not retain obsolete architecture claims", () => {
     const copy = [nantty?.summary, ...(nantty?.overview ?? []), ...(nantty?.architecture.map((item) => item.body) ?? [])].join(" ");
     expect(copy).not.toMatch(/79 modules|Kafka|Kubernetes/);
   });

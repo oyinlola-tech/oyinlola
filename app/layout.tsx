@@ -71,6 +71,7 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${site.url}/#person`,
   name: site.name,
   alternateName: site.short,
   jobTitle: site.role,
@@ -78,20 +79,23 @@ const jsonLd = {
   email: site.email,
   telephone: site.phone,
   description: site.description,
+  image: `${site.url}/cv-headshot.webp`,
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Okitipupa",
-    addressRegion: "Ondo State",
+    addressLocality: "Lagos",
+    addressRegion: "Lagos State",
     addressCountry: "NG",
   },
   sameAs: [links.github, links.linkedin, links.twitter],
   knowsAbout: [
+    "Backend software engineering",
     "Go",
+    "Python",
     "TypeScript",
+    "Data engineering",
+    "Application security",
     "Distributed systems",
-    "E-commerce",
-    "Platform engineering",
-    "API security",
+    "Developer tools",
   ],
 };
 

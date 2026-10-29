@@ -12,7 +12,7 @@ export const site = {
   positioning:
     "I build the systems behind useful products — backend APIs, data pipelines, developer tools, and the architecture that holds them together.",
   description:
-    "Software engineer in Lagos, Nigeria. Backend systems, developer tools and data-driven applications in Go, Python and TypeScript — with a working interest in distributed systems, data engineering and application security.",
+    "Oluwayemi Oyinlola Michael is a software engineer in Lagos, Nigeria, building backend systems, developer tools and data-driven applications with Go, Python and TypeScript. His work focuses on distributed systems, data engineering and application security.",
   location: "Lagos, Nigeria",
   timezone: "WAT · UTC+1",
   email: "oluwayemioyinlola2@gmail.com",
@@ -109,7 +109,7 @@ export const disciplines: Discipline[] = [
       "Background processing",
       "API documentation",
     ],
-    evidence: ["zudomart", "kolo", "telente-store"],
+    evidence: ["nantty", "kolo", "telente-store"],
   },
   {
     id: "architecture",
@@ -127,7 +127,7 @@ export const disciplines: Discipline[] = [
       "Lifecycle & graceful shutdown",
       "Multi-tenancy",
     ],
-    evidence: ["zudojs", "zudomart", "telente-store"],
+    evidence: ["zudojs", "nantty", "telente-store"],
   },
   {
     id: "data",
@@ -145,7 +145,7 @@ export const disciplines: Discipline[] = [
       "Vector search",
       "Automation",
     ],
-    evidence: ["zudomart", "telente-cbt", "utils-tool"],
+    evidence: ["nantty", "telente-cbt", "utils-tool"],
   },
   {
     id: "security",
@@ -185,7 +185,7 @@ export const disciplines: Discipline[] = [
       "Postman",
       "pgAdmin",
     ],
-    evidence: ["zudomart", "telente-cbt", "utils-tool"],
+    evidence: ["nantty", "telente-cbt", "utils-tool"],
   },
 ];
 
