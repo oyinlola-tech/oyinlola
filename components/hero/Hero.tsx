@@ -9,6 +9,23 @@ const HEADLINE = ["Systems that", "hold their shape."];
 const nantty = work.find((w) => w.slug === "nantty")!;
 const zudojs = work.find((w) => w.slug === "zudojs")!;
 
+function FounderBio() {
+  return (
+    <>
+      I&rsquo;m {site.name}, a software engineer in Nigeria and the founder of{" "}
+      <a
+        href="https://nantty.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+      >
+        Nantty
+      </a>, a social marketplace under development. I build backend APIs, data pipelines and
+      developer tools.
+    </>
+  );
+}
+
 /**
  * The hero stage.
  *
@@ -154,8 +171,7 @@ export default function Hero() {
               } as React.CSSProperties
             }
           >
-            I&rsquo;m {site.name}, a software engineer in Nigeria. I build backend APIs, data
-            pipelines and developer tools — and the architecture that holds them together.
+            <FounderBio />
           </p>
 
           {/* Current focus — the four things the work is actually pointed at. */}
@@ -305,8 +321,7 @@ export default function Hero() {
             className="animate-rise max-w-md text-[clamp(0.88rem,3.7vw,1rem)] leading-[1.55] text-ink-dim"
             style={{ animationDelay: "300ms" }}
           >
-            I&rsquo;m {site.name}, a software engineer in Nigeria. I build backend APIs, data
-            pipelines and developer tools — and the architecture that holds them together.
+            <FounderBio />
           </p>
         </div>
 
