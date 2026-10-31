@@ -19,11 +19,8 @@ const ConstellationCanvas = dynamic(() => import("./ConstellationCanvas"), {
  *
  * The 2.5s timeout is the backstop for a main thread that never goes idle.
  *
- * Save-Data is honoured outright. This site's own stated principle is to
- * build "for thin margins and slow networks"; sending half a megabyte of
- * decoration to someone who has explicitly asked for less would be at odds
- * with the page it is decorating. Those visitors keep the gradient wash,
- * which is what a machine without WebGL already falls back to.
+ * Save-Data, narrow screens and reduced-motion preferences keep the gradient
+ * wash without downloading or starting the decorative WebGL layer.
  */
 type Connection = { saveData?: boolean };
 
@@ -32,7 +29,10 @@ export default function DeferredConstellation() {
 
   useEffect(() => {
     const conn = (navigator as Navigator & { connection?: Connection }).connection;
-    if (conn?.saveData) return;
+    const skipCanvas =
+      conn?.saveData ||
+      window.matchMedia("(max-width: 1023px), (prefers-reduced-motion: reduce)").matches;
+    if (skipCanvas) return;
 
     if (typeof window.requestIdleCallback !== "function") {
       const t = window.setTimeout(() => setShow(true), 400);

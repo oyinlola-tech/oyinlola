@@ -89,7 +89,20 @@ export default function AboutPage() {
               <div className="space-y-6 text-[1.0625rem] leading-relaxed text-ink-dim">
                 {aboutBody.map((para, i) => (
                   <p key={i} className={i === 0 ? "text-[1.25rem] leading-relaxed text-ink" : ""}>
-                    {para}
+                    {para.includes("Nantty") ? (
+                      <>
+                        {para.split("Nantty")[0]}
+                        <a
+                          href="https://nantty.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+                        >
+                          Nantty
+                        </a>
+                        {para.split("Nantty").slice(1).join("Nantty")}
+                      </>
+                    ) : para}
                   </p>
                 ))}
               </div>

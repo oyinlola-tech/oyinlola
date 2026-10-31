@@ -294,7 +294,7 @@ export const principles: Principle[] = [
 
 /** About-page narrative, kept out of the component. */
 export const aboutBody = [
-  "I'm Oluwayemi Oyinlola Michael, a software engineer from Nigeria focused on backend development and systems engineering.",
+  "I'm Oluwayemi Oyinlola Michael, a software engineer from Nigeria focused on backend development and systems engineering. I'm also the founder of Nantty, a social marketplace currently under development.",
   "I enjoy building the parts of software that users don't always see: APIs, databases, authentication systems, event-driven services, data pipelines, developer tools, and the architecture that connects everything together.",
   "I work primarily with Go, Python and TypeScript, across PostgreSQL, Redis, Fastify, Gin, Docker and Linux. Most of what I have shipped serves Nigerian businesses — schools, shops, savings groups, traders — which is a demanding teacher, because those users have thin margins, slow networks and no patience for a product that almost works.",
   "I'm particularly interested in how a system evolves from a simple application into reliable, maintainable infrastructure. That interest is what led me through monolith, modular monolith and microservice architectures, and into building my own framework and developer tooling experiments.",
