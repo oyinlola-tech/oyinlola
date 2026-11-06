@@ -11,7 +11,7 @@ import Terminal from "@/components/terminal/Terminal";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
-  title: `${site.name} — ${site.role}`,
+  title: `${site.name} — Software, Full-stack & Data Engineer`,
   description: site.description,
   path: "/",
   absoluteTitle: true,

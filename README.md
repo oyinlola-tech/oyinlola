@@ -15,7 +15,7 @@ the contact endpoint.
 | `/` | Hero, featured case studies, principles, the five engineering layers, the terminal |
 | `/work` | All fifteen case studies, plus the GitHub long tail |
 | `/work/[slug]` | One case study — overview, problem, architecture, decisions, stack |
-| `/engineering` | Backend, architecture, data, security, infrastructure — with the evidence for each |
+| `/engineering` | Full-stack, backend, architecture, data, security and infrastructure — with the evidence for each |
 | `/lab` | The interactive shell, and the experiments behind it |
 | `/about` | Story, experience timeline, education, how I work |
 | `/cv` | Full CV, with print-to-PDF |

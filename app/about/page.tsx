@@ -15,7 +15,7 @@ import {
 } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
-  title: `${site.name} — ${site.role} in Lagos, Nigeria`,
+  title: `${site.name} — Software, Full-stack & Data Engineer in Lagos, Nigeria`,
   description: site.description,
   path: "/about",
   absoluteTitle: true,

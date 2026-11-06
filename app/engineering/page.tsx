@@ -10,7 +10,7 @@ import { work } from "@/content/work";
 export const metadata: Metadata = pageMeta({
   title: "Engineering",
   description:
-    "Backend, architecture, data, security and infrastructure — the five layers the work sits in, with the projects that prove each one.",
+    "Full-stack, backend, architecture, data engineering, security and infrastructure — the areas the work spans, with projects that show the stack.",
   path: "/engineering",
 });
 
@@ -20,11 +20,11 @@ export default function EngineeringPage() {
       <PageHeader
         index={navIndex("/engineering")}
         label="Engineering"
-        title="Five layers, one problem."
+        title="Six disciplines, one practice."
         lede={
           <>
-            Software engineering, databases, distributed systems, data and security are not five
-            careers — they are one problem viewed from five angles. This is where the work sits in
+            Software engineering, databases, distributed systems, data and security work together
+            as one practice. This is where the work sits in
             each, and which project is the evidence.
           </>
         }

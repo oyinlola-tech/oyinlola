@@ -27,7 +27,7 @@ export const metadata: Metadata = pageMeta({
   title: `${site.name} — CV`,
   absoluteTitle: true,
   description:
-    `Curriculum vitae for ${site.name} — software engineer in ${site.location}. Go, Python and TypeScript; distributed systems, data engineering and application security.`,
+    `Curriculum vitae for ${site.name}, a software, full-stack and data engineer in ${site.location}. Go, Python, PHP, Kotlin, Swift and React Native.`,
   path: "/cv",
 });
 

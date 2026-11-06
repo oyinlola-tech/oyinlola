@@ -21,12 +21,12 @@ export const CV_PDF = {
 
 export const cvMeta = {
   title: "Software Engineer",
-  subtitle: "Software Engineering · Data Engineering · Application Security · Developer Tools",
+  subtitle: "Full-Stack Software Engineering · Data Engineering · Application Security · Developer Tools",
   updated: "2026",
 };
 
 export const summary = [
-  "Software engineer in Lagos, Nigeria, working across software engineering, data engineering and application security in Go, Python and TypeScript. I build products end to end: APIs and data models, processing pipelines and search, authentication and payments, and the Linux infrastructure they run on.",
+  "Software, full-stack and data engineer in Lagos, Nigeria, working across Go, Python, TypeScript and modern web and mobile applications. I build products end to end: interfaces, APIs and data models, processing pipelines and search, authentication and payments, and the Linux infrastructure they run on.",
   "Recent work includes a virtual football platform that shows every match identically on web, mobile and TV, a network intrusion detection system that explains each alert, a tool that enforces commit policy on GitHub, and Zudojs, an open-source TypeScript framework for building backends.",
   "On the data side, I build services that turn raw input into something people can use: network traffic into scored security incidents, audio into matched hymns and Bible verses, and simulated matches into prices, risk limits and analytics.",
   "Studying for a BSc in Computer Science at the University of the People. Open to software engineering, data engineering and platform roles.",
@@ -35,7 +35,7 @@ export const summary = [
 export type SkillGroup = { label: string; items: string };
 
 export const skills: SkillGroup[] = [
-  { label: "Languages", items: "Go · Python · TypeScript · JavaScript · SQL · Bash" },
+  { label: "Languages", items: "Go · Kotlin · PHP · Python · Swift · TypeScript · JavaScript · SQL · Bash" },
   { label: "Software Engineering", items: "Node.js · Fastify · Express · Gin · FastAPI · REST APIs · gRPC · WebSockets" },
   {
     label: "Data Engineering",
@@ -53,7 +53,7 @@ export const skills: SkillGroup[] = [
   },
   { label: "Infrastructure", items: "Linux · Docker · Kubernetes · Terraform · Nginx · Git · CI/CD · GitHub Actions" },
   { label: "Engineering Practice", items: "API Design · OpenAPI · Automated Testing · Technical Writing · CLI Tools" },
-  { label: "Frontend & Mobile", items: "React · Next.js · Tailwind CSS · React Native · Expo" },
+  { label: "Frontend & Mobile", items: "React · Next.js · Tailwind CSS · React Native · Expo · Kotlin · Swift" },
 ];
 
 export type SoftSkill = { label: string; detail: string };

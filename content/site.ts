@@ -10,16 +10,16 @@ export const site = {
   role: "Software Engineer",
   /** The one-line positioning statement. */
   positioning:
-    "I build the systems behind useful products — backend APIs, data pipelines, developer tools, and the architecture that holds them together.",
+    "I work across software, full-stack and data engineering — building product interfaces, backend APIs, data pipelines, developer tools and the architecture that connects them.",
   description:
-    "Oluwayemi Oyinlola Michael is a software engineer in Lagos, Nigeria, building backend systems, developer tools and data-driven applications with Go, Python and TypeScript. His work focuses on distributed systems, data engineering and application security.",
+    "Oluwayemi Oyinlola Michael is a software, full-stack and data engineer in Lagos, and founder of Nantty, a social marketplace in development.",
   location: "Lagos, Nigeria",
   timezone: "WAT · UTC+1",
   email: "oluwayemioyinlola2@gmail.com",
   phone: "+234 913 351 9489",
   url: "https://www.oyinlola.site",
   available: true,
-  availableFor: "Backend, platform and software engineering roles",
+  availableFor: "Software, full-stack, data and platform engineering roles",
 } as const;
 
 /** Shown under the hero — what the work is pointed at right now. */
@@ -77,7 +77,7 @@ export const telemetry = [
 ] as const;
 
 /* ------------------------------------------------------------------ *
- *  Engineering — the five layers the work actually sits in.
+ *  Engineering — the disciplines the work actually sits in.
  * ------------------------------------------------------------------ */
 
 export type Discipline = {
@@ -90,6 +90,14 @@ export type Discipline = {
 };
 
 export const disciplines: Discipline[] = [
+  {
+    id: "full-stack",
+    title: "Full-stack",
+    lede: "Across web, mobile and services.",
+    body: "I build across the application: browser interfaces, mobile clients, APIs and the data layer behind them. My toolkit includes React and React Native with Expo, plus Kotlin and Swift for native mobile development, alongside PHP and the backend technologies used across my projects.",
+    items: ["React", "Next.js", "React Native", "Expo", "Kotlin", "Swift", "PHP", "TypeScript", "REST APIs"],
+    evidence: ["betng", "powerwatch", "rivvo"],
+  },
   {
     id: "backend",
     title: "Backend",
@@ -132,8 +140,8 @@ export const disciplines: Discipline[] = [
   {
     id: "data",
     title: "Data",
-    lede: "Where the work is heading.",
-    body: "Deliberately moving toward Python and data engineering — pipelines, event processing, ranking and recommendation, and the analytics that make a product improve rather than just run. In Nantty, a separate Python intelligence service supplies scores while product services retain the decisions.",
+    lede: "Across the data lifecycle.",
+    body: "I work as a data engineer as well as a software engineer, building pipelines, event processing, search, ranking and analytics that turn application data into useful outputs. In Nantty, a separate Python intelligence service supplies scores while product services retain the decisions.",
     items: [
       "Python",
       "FastAPI",
@@ -193,7 +201,8 @@ export const disciplines: Discipline[] = [
 export type StackGroup = { title: string; items: string[] };
 
 export const stack: StackGroup[] = [
-  { title: "Backend", items: ["Go", "Python", "TypeScript", "Node.js", "Fastify", "Gin"] },
+  { title: "Backend", items: ["Go", "PHP", "Python", "TypeScript", "Node.js", "Fastify", "Gin"] },
+  { title: "Frontend & Mobile", items: ["React", "Next.js", "React Native", "Expo", "Kotlin", "Swift"] },
   { title: "Databases", items: ["PostgreSQL", "MariaDB", "MySQL", "Redis", "Prisma", "ent", "sqlc", "pgx"] },
   { title: "Data", items: ["Python", "Data pipelines", "Event processing", "Analytics", "Ranking"] },
   {
@@ -294,9 +303,9 @@ export const principles: Principle[] = [
 
 /** About-page narrative, kept out of the component. */
 export const aboutBody = [
-  "I'm Oluwayemi Oyinlola Michael, a software engineer from Nigeria focused on backend development and systems engineering. I'm also the founder of Nantty, a social marketplace currently under development.",
+  "I'm Oluwayemi Oyinlola Michael, a software engineer, full-stack engineer and data engineer from Nigeria, focused on building useful products and reliable systems. I'm also the founder of Nantty, a social marketplace currently under development.",
   "I enjoy building the parts of software that users don't always see: APIs, databases, authentication systems, event-driven services, data pipelines, developer tools, and the architecture that connects everything together.",
   "I work primarily with Go, Python and TypeScript, across PostgreSQL, Redis, Fastify, Gin, Docker and Linux. Most of what I have shipped serves Nigerian businesses — schools, shops, savings groups, traders — which is a demanding teacher, because those users have thin margins, slow networks and no patience for a product that almost works.",
   "I'm particularly interested in how a system evolves from a simple application into reliable, maintainable infrastructure. That interest is what led me through monolith, modular monolith and microservice architectures, and into building my own framework and developer tooling experiments.",
-  "I'm also developing my knowledge in data engineering and cybersecurity — not as separate careers, but because a serious backend needs both. Software engineering, databases, distributed systems, data and security are one problem viewed from five angles.",
+  "Data engineering is part of my work: building pipelines, processing systems and data products alongside software engineering. I also apply security practices throughout the software I build.",
 ];
